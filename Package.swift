@@ -4,24 +4,35 @@
 import PackageDescription
 
 let package = Package(
-    name: "MobileJoe",
-    platforms: [
-        .iOS(.v17)
-    ],
-    products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "MobileJoe",
-            targets: ["MobileJoe"]),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "MobileJoe"),
-        .testTarget(
-            name: "MobileJoeTests",
-            dependencies: ["MobileJoe"]
-        ),
-    ]
+  name: "MobileJoe",
+  defaultLocalization: "en",
+  platforms: [
+    .iOS(.v17)
+  ],
+  products: [
+    .library(
+      name: "MobileJoe",
+      targets: ["MobileJoe"]),
+    .library(
+      name: "MobileJoeUI",
+      targets: ["MobileJoeUI"]),
+  ],
+  targets: [
+    .target(
+      name: "MobileJoe",
+      path: "Sources"
+    ),
+    .testTarget(
+      name: "MobileJoeTests",
+      dependencies: ["MobileJoe"]
+    ),
+    .target(
+      name: "MobileJoeUI",
+      dependencies: ["MobileJoe"],
+      path: "MobileJoeUI",
+      resources: [
+        .process("Resources")
+      ]
+    ),
+  ]
 )

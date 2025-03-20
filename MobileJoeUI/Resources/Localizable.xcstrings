@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "feature-request.list.sorting" : {
+
+    },
+    "feature-request.list.sorting.by-date" : {
+
+    },
+    "feature-request.list.sorting.by-score" : {
+
+    },
+    "feature-request.list.title" : {
+
+    }
+  },
+  "version" : "1.0"
+}
