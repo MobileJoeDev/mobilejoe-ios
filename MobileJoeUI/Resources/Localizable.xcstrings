@@ -2,16 +2,44 @@
   "sourceLanguage" : "en",
   "strings" : {
     "feature-request.list.sorting" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorting"
+          }
+        }
+      }
     },
     "feature-request.list.sorting.by-date" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Newest"
+          }
+        }
+      }
     },
     "feature-request.list.sorting.by-score" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rating"
+          }
+        }
+      }
     },
     "feature-request.list.title" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feature Requests"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

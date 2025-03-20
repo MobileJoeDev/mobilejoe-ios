@@ -4,7 +4,7 @@ import MobileJoe
 struct FeatureRequestListRow: View {
   let feature: MobileJoe.FeatureRequest
   let vote: (MobileJoe.FeatureRequest) -> Void
-
+  
   var body: some View {
     HStack(spacing: 6) {
       VStack(alignment: .leading, spacing: 6) {
@@ -14,10 +14,10 @@ struct FeatureRequestListRow: View {
           .lineLimit(2)
           .font(.callout)
           .foregroundStyle(.secondary)
-
+        
         Status()
       }
-
+      
       Spacer()
       VoteButton()
     }
@@ -49,12 +49,12 @@ extension FeatureRequestListRow {
     }
     .buttonStyle(.plain)
   }
-
+  
   func Status() -> some View {
     HStack(spacing: 4) {
       Circle()
         .frame(width: 6)
-
+      
       Text(feature.status.localizedCapitalized)
         .font(.caption)
         .fontWeight(.medium)
@@ -72,11 +72,11 @@ extension FeatureRequestListRow {
   private var backgroundColor: Color {
     feature.isVoted ? .accentColor.opacity(0.1) : .clear
   }
-
+  
   private var strokeColor: Color {
     feature.isVoted ? .accentColor : .secondary
   }
-
+  
   private var foregroundColor: Color {
     feature.isVoted ? .accentColor : .primary
   }
@@ -84,10 +84,7 @@ extension FeatureRequestListRow {
 
 extension MobileJoe.FeatureRequest {
   var statusColor: Color {
-//    guard let color = Color(hex: "\(statusHexColor)ff") else {
-      return .blue
-//    }
-//    return color
+    Color(hex: "\(statusHexColor)ff") ?? .blue
   }
 }
 

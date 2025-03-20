@@ -3,10 +3,10 @@ import MobileJoe
 
 public struct FeatureRequestListView: View {
   let joe: MobileJoe
-
+  
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
-
+  
   public var body: some View {
     NavigationView {
       List {
@@ -14,8 +14,7 @@ public struct FeatureRequestListView: View {
           FeatureRequestListRow(feature: feature) { vote($0) }
         }
       }
-//      .errorAlert(error: $error)
-      .navigationTitle("feature-request.list.title")
+      .navigationTitle(Bundle.module.localizedString(forKey: "feature-request.list.title", value: nil, table: nil))
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
@@ -23,23 +22,23 @@ public struct FeatureRequestListView: View {
             Button {
               joe.sortByScore()
             } label: {
-              Label("feature-request.list.sorting.by-score", systemImage: "number")
+              Label(Bundle.module.localizedString(forKey:"feature-request.list.sorting.by-score", value: nil, table: nil), systemImage: "number")
             }
             Button {
               joe.sortByDate()
             } label: {
-              Label("feature-request.list.sorting.by-date", systemImage: "calendar")
+              Label(Bundle.module.localizedString(forKey:"feature-request.list.sorting.by-date", value: nil, table: nil), systemImage: "calendar")
             }
-          
+            
           } label: {
-            Label("feature-request.list.sorting", systemImage: "arrow.up.arrow.down")
+            Label(Bundle.module.localizedString(forKey:"feature-request.list.sorting", value: nil, table: nil), systemImage: "arrow.up.arrow.down")
           }
         }
-
+        
         ToolbarItem(placement: .topBarTrailing) {
-//          CloseButtonToolbarItem {
-//            dismiss()
-//          }
+          CloseButtonToolbarItem {
+            dismiss()
+          }
         }
       }
     }
@@ -47,11 +46,11 @@ public struct FeatureRequestListView: View {
       await fetchFeatureRequests()
     }
   }
-
+  
   public init() {
     self.init(joe: .shared)
   }
-
+  
   init(joe: MobileJoe) {
     self.joe = joe
   }
@@ -65,7 +64,7 @@ extension FeatureRequestListView {
       self.error = error
     }
   }
-
+  
   private func vote(_ feature: MobileJoe.FeatureRequest) {
     Task {
       do {
