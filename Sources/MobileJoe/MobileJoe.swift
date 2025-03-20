@@ -1,5 +1,5 @@
 //
-//  Copyright MobileJoe. All Rights Reserved.
+//  Copyright Florian Mielke. All Rights Reserved.
 //
 //  Licensed under the MIT License (the "License");
 //  you may not use this file except in compliance with the License.
@@ -7,9 +7,9 @@
 //
 //      https://opensource.org/licenses/MIT
 //
-//  Logger.swift
+//  MobileJoe.swift
 //
-//  Created by Florian Mielke on 20/03/25.
+//  Created by Florian on 20.03.25.
 //
 
 import Foundation
