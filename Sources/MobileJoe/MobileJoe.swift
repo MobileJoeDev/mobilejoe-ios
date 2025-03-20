@@ -13,7 +13,6 @@
 //
 
 import Foundation
-import SwiftUI
 import OSLog
 
 @MainActor
@@ -21,11 +20,23 @@ import OSLog
 public class MobileJoe {
   public static let shared = MobileJoe()
 
+  @discardableResult
+  public static func configure(withAPIKey apiKey: String, appUserID: String) -> MobileJoe {
+    shared.apiKey = apiKey
+    shared.appUserID = appUserID.escaped
+    return shared
+  }
+
   public var featureRequests: [FeatureRequest] = []
 
+  private var apiKey: String = "" {
+    didSet {
+      NetworkClient.configure(withAPIKey: apiKey)
+    }
+  }
+  private var appUserID: String = ""
   private var featureRequestContainer = Set<FeatureRequest>()
   private let logger = Logger(subsystem: "MobileJoe", category: "MobileJoe")
-  private let apiKey = "f5207a5941ab5449c6f7c61dbb5c9215"
 
   private init() {
   }
@@ -45,17 +56,20 @@ public class MobileJoe {
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+    request.httpBody = try JSONEncoder().encode(["user_id": appUserID])
     let response = try await URLSession.shared.data(for: request)
     guard is200Response(response.1) else {
       throw MobileJoeError.generic("Invalid response: \(response.1)")
     }
 
-    let result = try decoder.decode(FeatureRequest.self, from: response.0)
+    let result = try JSONDecoder.shared.decode(FeatureRequest.self, from: response.0)
     featureRequestContainer.remove(result)
     featureRequestContainer.insert(result)
     featureRequestsDidUpdate()
   }
+}
 
+extension MobileJoe {
   public func sortByScore() {
     featureRequests.sort { lhs, rhs in
       if lhs.score == rhs.score {
@@ -82,7 +96,7 @@ public class MobileJoe {
       throw MobileJoeError.generic("Invalid response: \(response)")
     }
 
-    let result = try decoder.decode([FeatureRequest].self, from: data)
+    let result = try JSONDecoder.shared.decode([FeatureRequest].self, from: data)
     featureRequestContainer = Set(result)
     featureRequestsDidUpdate()
   }
@@ -98,47 +112,5 @@ public class MobileJoe {
 
   private func is200Response(_ response: URLResponse) -> Bool {
     (response as? HTTPURLResponse)?.statusCode == 200
-  }
-
-  @ObservationIgnored
-  private lazy var decoder: JSONDecoder = {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-    formatter.timeZone = .utc
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .formatted(formatter)
-    return decoder
-  }()
-}
-
-extension MobileJoe {
-  public struct FeatureRequest: Identifiable, Hashable, Codable {
-    public let id: Int
-    public let title: String
-    public let body: String
-    public let score: Int
-    public let status: String
-    public let updatedAt: Date
-    public let isVoted: Bool
-    public let statusHexColor: String
-
-    private enum CodingKeys: String, CodingKey {
-      case id
-      case title
-      case body
-      case score
-      case status
-      case statusHexColor = "status_color"
-      case updatedAt = "updated_at"
-      case isVoted = "voted"
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-      hasher.combine(id)
-    }
-    
-    public static func == (lhs: FeatureRequest, rhs: FeatureRequest) -> Bool {
-      lhs.id == rhs.id
-    }
   }
 }
