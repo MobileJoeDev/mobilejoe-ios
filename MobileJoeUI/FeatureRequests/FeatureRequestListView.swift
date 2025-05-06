@@ -16,7 +16,7 @@ import SwiftUI
 import MobileJoe
 
 public struct FeatureRequestListView: View {
-  let joe: MobileJoe
+  @State var joe: MobileJoe
   
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
@@ -28,7 +28,7 @@ public struct FeatureRequestListView: View {
           FeatureRequestListRow(feature: feature) { vote($0) }
         }
       }
-      .navigationTitle(Bundle.module.localizedString(forKey: "feature-request.list.title", value: nil, table: nil))
+      .navigationTitle(String(localized: "feature-request.list.title", bundle: .module))
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
@@ -36,16 +36,16 @@ public struct FeatureRequestListView: View {
             Button {
               joe.sortByScore()
             } label: {
-              Label(Bundle.module.localizedString(forKey:"feature-request.list.sorting.by-score", value: nil, table: nil), systemImage: "number")
+              Label(String(localized: "feature-request.list.sorting.by-score", bundle: .module), systemImage: "number")
             }
             Button {
               joe.sortByDate()
             } label: {
-              Label(Bundle.module.localizedString(forKey:"feature-request.list.sorting.by-date", value: nil, table: nil), systemImage: "calendar")
+              Label(String(localized: "feature-request.list.sorting.by-date", bundle: .module), systemImage: "calendar")
             }
             
           } label: {
-            Label(Bundle.module.localizedString(forKey:"feature-request.list.sorting", value: nil, table: nil), systemImage: "arrow.up.arrow.down")
+            Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: "arrow.up.arrow.down")
           }
         }
         
@@ -57,7 +57,7 @@ public struct FeatureRequestListView: View {
       }
     }
     .task {
-      await fetchFeatureRequests()
+      //      await fetchFeatureRequests()
     }
   }
   
@@ -91,5 +91,5 @@ extension FeatureRequestListView {
 }
 
 #Preview {
-  FeatureRequestListView(joe: MobileJoeFixture.shared)
+  FeatureRequestListView(joe: MobileJoeFixture())
 }

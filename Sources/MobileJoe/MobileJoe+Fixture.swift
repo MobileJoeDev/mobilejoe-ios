@@ -15,8 +15,11 @@
 import Foundation
 
 public class MobileJoeFixture: MobileJoe {
-  public override func fetchFeatureRequests() async throws {
-    featureRequests = [
+  public static let mock = MobileJoe()
+
+  override public init() {
+    super.init()
+    self.featureRequests = [
       FeatureRequest(
         id: 1,
         title: "Import holidays from calendar",
@@ -38,6 +41,9 @@ public class MobileJoeFixture: MobileJoe {
         statusHexColor: "#FF0000"
       ),
     ]
+  }
+
+  public override func fetchFeatureRequests() async throws {
   }
 
   public override func vote(for featureRequest: FeatureRequest) async throws {

@@ -31,9 +31,6 @@ public class MobileJoe {
   private var featureRequestContainer = Set<FeatureRequest>()
   private let logger = Logger(subsystem: "MobileJoe", category: "MobileJoe")
 
-  private init() {
-  }
-
   public func fetchFeatureRequests() async throws {
     let response = try await NetworkClient.shared.getFeatureRequests()
     try await handle(response)

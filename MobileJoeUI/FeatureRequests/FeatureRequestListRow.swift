@@ -96,12 +96,6 @@ extension FeatureRequestListRow {
   }
 }
 
-extension MobileJoe.FeatureRequest {
-  var statusColor: Color {
-    Color(hex: "\(statusHexColor)ff") ?? .blue
-  }
-}
-
 #Preview("Voted") {
   List {
     FeatureRequestListRow(feature: .fixture(isVoted: true), vote: { _ in })
