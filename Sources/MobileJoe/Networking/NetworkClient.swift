@@ -54,9 +54,9 @@ class NetworkClient {
   
   private func url(for path: String) throws -> URLComponents {
     var urlComponents = URLComponents()
-    urlComponents.scheme = Self.serverHostURL.scheme
-    urlComponents.host = Self.serverHostURL.host
-    urlComponents.path = "/\(Self.apiVersion)/\(path)"
+    urlComponents.scheme = NetworkClient.serverHostURL.scheme
+    urlComponents.host = NetworkClient.serverHostURL.host
+    urlComponents.path = "/\(NetworkClient.apiVersion)/\(path)"
     return urlComponents
   }
 }
