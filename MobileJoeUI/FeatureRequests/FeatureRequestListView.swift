@@ -48,6 +48,16 @@ public struct FeatureRequestListView: View {
             dismiss()
           }
         }
+
+        ToolbarItemGroup(placement: .bottomBar) {
+          Spacer()
+          Link(destination: URL(string: "mailto:support@worktimes.app?subject=Feature%20Request")!) {
+            Text("New Feature Request")
+              .fontWeight(.medium)
+          }
+          .buttonStyle(.bordered)
+          .clipShape(.capsule)
+        }
       }
     }
     .task {
