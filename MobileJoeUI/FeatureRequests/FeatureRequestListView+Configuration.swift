@@ -21,7 +21,7 @@ extension FeatureRequestListView {
     let subject: String?
     let body: String?
 
-    init(recipients: [String], subject: String? = nil, body: String? = nil) {
+    public init(recipients: [String], subject: String? = nil, body: String? = nil) {
       self.recipients = recipients
       self.subject = subject
       self.body = body
