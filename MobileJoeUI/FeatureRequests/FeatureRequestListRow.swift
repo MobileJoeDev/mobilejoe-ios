@@ -16,8 +16,8 @@ import SwiftUI
 import MobileJoe
 
 struct FeatureRequestListRow: View {
-  let feature: MobileJoe.FeatureRequest
-  let vote: (MobileJoe.FeatureRequest) -> Void
+  let feature: FeatureRequest
+  let vote: (FeatureRequest) -> Void
   
   var body: some View {
     HStack(spacing: 6) {

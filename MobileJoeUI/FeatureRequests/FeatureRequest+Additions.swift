@@ -15,7 +15,7 @@
 import SwiftUI
 import MobileJoe
 
-extension MobileJoe.FeatureRequest {
+extension FeatureRequest {
   var statusColor: Color {
     Color(hex: "\(statusHexColor)ff") ?? .blue
   }

@@ -7,17 +7,15 @@
 //
 //      https://opensource.org/licenses/MIT
 //
-//  MobileJoe.swift
+//  URLResponse+Additions.swift
 //
-//  Created by Florian on 20.03.25.
+//  Created by Florian on 08.05.25.
 //
 
 import Foundation
 
-@MainActor
-@Observable
-public class MobileJoe {
-  public static func configure(withAPIKey apiKey: String, appUserID: String) {
-    NetworkClient.configure(withAPIKey: apiKey, appUserID: appUserID)
+extension URLResponse {
+  var isOK: Bool {
+    (self as? HTTPURLResponse)?.statusCode == 200
   }
 }

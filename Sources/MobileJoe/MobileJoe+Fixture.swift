@@ -14,12 +14,12 @@
 
 import Foundation
 
-public class MobileJoeFixture: MobileJoe {
-  public static let mock = MobileJoe()
+public class FeatureRequestsFixture: FeatureRequests {
+  public static let mock = FeatureRequests()
 
-  override public init() {
+  public init() {
     super.init()
-    self.featureRequests = [
+    self.all = [
       FeatureRequest(
         id: 1,
         title: "Import holidays from calendar",
@@ -43,16 +43,16 @@ public class MobileJoeFixture: MobileJoe {
     ]
   }
 
-  public override func fetchFeatureRequests() async throws {
+  public override func load() async throws {
   }
 
-  public override func vote(for featureRequest: FeatureRequest) async throws {
+  public override func vote(_ featureRequest: FeatureRequest) async throws {
   }
 }
 
-extension MobileJoe.FeatureRequest {
-  public static func fixture(isVoted: Bool) -> MobileJoe.FeatureRequest {
-    MobileJoe.FeatureRequest(
+extension FeatureRequest {
+  public static func fixture(isVoted: Bool) -> FeatureRequest {
+    FeatureRequest(
       id: 1,
       title: "Import holidays from calendar",
       body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",

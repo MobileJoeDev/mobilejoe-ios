@@ -16,15 +16,15 @@ import SwiftUI
 import MobileJoe
 
 public struct FeatureRequestListView: View {
-  @State var joe: MobileJoe
-  
+  @State var featureRequests: FeatureRequests
+
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
-  
+
   public var body: some View {
     NavigationView {
       List {
-        ForEach(joe.featureRequests) { feature in
+        ForEach(featureRequests.all) { feature in
           FeatureRequestListRow(feature: feature) { vote($0) }
         }
       }
@@ -33,22 +33,16 @@ public struct FeatureRequestListView: View {
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
           Menu {
-            Button {
-              joe.sortByScore()
-            } label: {
-              Label(String(localized: "feature-request.list.sorting.by-score", bundle: .module), systemImage: "number")
+            Picker(String(localized: "feature-request.list.sorting", bundle: .module), selection: $featureRequests.sorting) {
+              ForEach(FeatureRequests.Sorting.allCases) { sorting in
+                Label(sorting.title, systemImage: sorting.systemImage)
+              }
             }
-            Button {
-              joe.sortByDate()
-            } label: {
-              Label(String(localized: "feature-request.list.sorting.by-date", bundle: .module), systemImage: "calendar")
-            }
-            
           } label: {
-            Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: "arrow.up.arrow.down")
+            Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: "line.3.horizontal.decrease.circle")
           }
         }
-        
+
         ToolbarItem(placement: .topBarTrailing) {
           CloseButtonToolbarItem {
             dismiss()
@@ -57,32 +51,32 @@ public struct FeatureRequestListView: View {
       }
     }
     .task {
-      //      await fetchFeatureRequests()
+      await fetchFeatureRequests()
     }
   }
-  
+
   public init() {
-    self.init(joe: .shared)
+    self.init(featureRequests: FeatureRequests())
   }
-  
-  init(joe: MobileJoe) {
-    self.joe = joe
+
+  init(featureRequests: FeatureRequests) {
+    self.featureRequests = featureRequests
   }
 }
 
 extension FeatureRequestListView {
   private func fetchFeatureRequests() async {
     do {
-      try await joe.fetchFeatureRequests()
+      try await featureRequests.load()
     } catch {
       self.error = error
     }
   }
-  
-  private func vote(_ feature: MobileJoe.FeatureRequest) {
+
+  private func vote(_ featureRequest: FeatureRequest) {
     Task {
       do {
-        try await joe.vote(for: feature)
+        try await featureRequests.vote(featureRequest)
       } catch {
         self.error = error
       }
@@ -91,5 +85,5 @@ extension FeatureRequestListView {
 }
 
 #Preview {
-  FeatureRequestListView(joe: MobileJoeFixture())
+  FeatureRequestListView(featureRequests: FeatureRequestsFixture())
 }
