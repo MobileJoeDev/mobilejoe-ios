@@ -21,6 +21,7 @@ public struct FeatureRequestListView: View {
 
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
+  @State private var isLoading = false
 
   public var body: some View {
     NavigationView {
@@ -30,9 +31,7 @@ public struct FeatureRequestListView: View {
         }
       }
       .overlay {
-        if featureRequests.all.isEmpty {
-          NoFeatureRequestsView()
-        }
+        Overlay()
       }
       .navigationTitle(String(localized: "feature-request.list.title", bundle: .module))
       .navigationBarTitleDisplayMode(.inline)
@@ -88,6 +87,15 @@ extension FeatureRequestListView {
     }
   }
 
+  @ViewBuilder
+  func Overlay() -> some View {
+    if isLoading {
+      ProgressView(String(localized: "feature-request.list.loading", bundle: .module))
+    } else if featureRequests.all.isEmpty {
+      NoFeatureRequestsView()
+    }
+  }
+
   func NoFeatureRequestsView() -> some View {
     ContentUnavailableView(
       String(localized: "feature-request-list.no-items.title", bundle: .module),
@@ -100,7 +108,9 @@ extension FeatureRequestListView {
 extension FeatureRequestListView {
   private func fetchFeatureRequests() async {
     do {
+      isLoading = true
       try await featureRequests.load()
+      isLoading = false
     } catch {
       self.error = error
     }

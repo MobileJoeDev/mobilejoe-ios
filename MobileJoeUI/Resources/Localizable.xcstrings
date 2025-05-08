@@ -34,6 +34,17 @@
         }
       }
     },
+    "feature-request.list.loading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading…"
+          }
+        }
+      }
+    },
     "feature-request.list.new-feature-request" : {
       "extractionState" : "manual",
       "localizations" : {
