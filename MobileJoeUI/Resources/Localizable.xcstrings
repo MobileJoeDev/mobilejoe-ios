@@ -12,6 +12,28 @@
         }
       }
     },
+    "feature-request-list.no-items.text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No feature requests were found."
+          }
+        }
+      }
+    },
+    "feature-request-list.no-items.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Feature Requests"
+          }
+        }
+      }
+    },
     "feature-request.list.new-feature-request" : {
       "extractionState" : "manual",
       "localizations" : {

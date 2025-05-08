@@ -15,11 +15,11 @@
 import Foundation
 
 public class FeatureRequestsFixture: FeatureRequests {
-  public static let mock = FeatureRequests()
+  public static var empty = FeatureRequestsFixture()
 
-  public init() {
-    super.init()
-    self.all = [
+  public static var all: FeatureRequestsFixture {
+    let fr = FeatureRequestsFixture()
+    fr.all = [
       FeatureRequest(
         id: 1,
         title: "Import holidays from calendar",
@@ -41,6 +41,7 @@ public class FeatureRequestsFixture: FeatureRequests {
         statusHexColor: "#FF0000"
       ),
     ]
+    return fr
   }
 
   public override func load() async throws {

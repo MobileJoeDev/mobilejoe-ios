@@ -29,6 +29,11 @@ public struct FeatureRequestListView: View {
           FeatureRequestListRow(feature: feature) { vote($0) }
         }
       }
+      .overlay {
+        if featureRequests.all.isEmpty {
+          NoFeatureRequestsView()
+        }
+      }
       .navigationTitle(String(localized: "feature-request.list.title", bundle: .module))
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: ToolbarItems)
@@ -82,6 +87,14 @@ extension FeatureRequestListView {
       }
     }
   }
+
+  func NoFeatureRequestsView() -> some View {
+    ContentUnavailableView(
+      String(localized: "feature-request-list.no-items.title", bundle: .module),
+      systemImage: "magnifyingglass",
+      description: Text("feature-request-list.no-items.text", bundle: .module)
+    )
+  }
 }
 
 extension FeatureRequestListView {
@@ -104,9 +117,16 @@ extension FeatureRequestListView {
   }
 }
 
-#Preview {
+#Preview("All") {
   FeatureRequestListView(
-    featureRequests: FeatureRequestsFixture(),
+    featureRequests: FeatureRequestsFixture.all,
+    configuration: FeatureRequestListView.Configuration(recipients: ["support@mobilejoe.dev"])
+  )
+}
+
+#Preview("Empty") {
+  FeatureRequestListView(
+    featureRequests: FeatureRequestsFixture.empty,
     configuration: FeatureRequestListView.Configuration(recipients: ["support@mobilejoe.dev"])
   )
 }
