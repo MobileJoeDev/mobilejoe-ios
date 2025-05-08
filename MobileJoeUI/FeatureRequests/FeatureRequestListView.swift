@@ -15,6 +15,21 @@
 import SwiftUI
 import MobileJoe
 
+struct LocalizedAlertError: LocalizedError {
+  let underlyingError: LocalizedError
+  var errorDescription: String? {
+    underlyingError.errorDescription
+  }
+  var recoverySuggestion: String? {
+    underlyingError.recoverySuggestion
+  }
+
+  init?(error: Error?) {
+    guard let localizedError = error as? LocalizedError else { return nil }
+    underlyingError = localizedError
+  }
+}
+
 public struct FeatureRequestListView: View {
   @State var featureRequests: FeatureRequests
   let configuration: Configuration
@@ -37,6 +52,7 @@ public struct FeatureRequestListView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: ToolbarItems)
     }
+    .errorAlert(error: $error)
     .task {
       await fetchFeatureRequests()
     }
@@ -49,6 +65,16 @@ public struct FeatureRequestListView: View {
   init(featureRequests: FeatureRequests, configuration: Configuration) {
     self.featureRequests = featureRequests
     self.configuration = configuration
+  }
+
+  private var showingError: Binding<Bool> {
+    return .init {
+      self.error != nil
+    } set: { newValue in
+      if !newValue {
+        self.error = nil
+      }
+    }
   }
 }
 
@@ -123,6 +149,21 @@ extension FeatureRequestListView {
       } catch {
         self.error = error
       }
+    }
+  }
+}
+
+extension View {
+  func errorAlert(error: Binding<Error?>) -> some View {
+    let localizedAlertError = LocalizedAlertError(error: error.wrappedValue)
+    return alert(isPresented: .constant(localizedAlertError != nil), error: localizedAlertError) { _ in
+      Button {
+        error.wrappedValue = nil
+      } label: {
+        Text("OK", bundle: .module)
+      }
+    } message: { error in
+      Text(error.recoverySuggestion ?? "")
     }
   }
 }
