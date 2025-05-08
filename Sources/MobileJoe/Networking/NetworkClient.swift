@@ -14,6 +14,7 @@ class NetworkClient {
   @discardableResult
   static func configure(withAPIKey apiKey: String, appUserID: String) -> NetworkClient {
     shared.apiKey = apiKey
+    shared.appUserID = appUserID
     return shared
   }
 
