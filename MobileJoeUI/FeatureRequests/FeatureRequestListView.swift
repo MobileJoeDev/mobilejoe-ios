@@ -30,35 +30,7 @@ public struct FeatureRequestListView: View {
       }
       .navigationTitle(String(localized: "feature-request.list.title", bundle: .module))
       .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .topBarLeading) {
-          Menu {
-            Picker(String(localized: "feature-request.list.sorting", bundle: .module), selection: $featureRequests.sorting) {
-              ForEach(FeatureRequests.Sorting.allCases) { sorting in
-                Label(sorting.title, systemImage: sorting.systemImage)
-              }
-            }
-          } label: {
-            Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: "line.3.horizontal.decrease.circle")
-          }
-        }
-
-        ToolbarItem(placement: .topBarTrailing) {
-          CloseButtonToolbarItem {
-            dismiss()
-          }
-        }
-
-        ToolbarItemGroup(placement: .bottomBar) {
-          Spacer()
-          Link(destination: URL(string: "mailto:support@worktimes.app?subject=Feature%20Request")!) {
-            Text("New Feature Request")
-              .fontWeight(.medium)
-          }
-          .buttonStyle(.bordered)
-          .clipShape(.capsule)
-        }
-      }
+      .toolbar(content: ToolbarItems)
     }
     .task {
       await fetchFeatureRequests()
@@ -71,6 +43,40 @@ public struct FeatureRequestListView: View {
 
   init(featureRequests: FeatureRequests) {
     self.featureRequests = featureRequests
+  }
+}
+
+extension FeatureRequestListView {
+  @ToolbarContentBuilder
+  private func ToolbarItems() -> some ToolbarContent {
+    ToolbarItem(placement: .topBarLeading) {
+      Menu {
+        Picker(String(localized: "feature-request.list.sorting", bundle: .module), selection: $featureRequests.sorting) {
+          ForEach(FeatureRequests.Sorting.allCases) { sorting in
+            Label(sorting.title, systemImage: sorting.systemImage)
+          }
+        }
+      } label: {
+        Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: "line.3.horizontal.decrease.circle")
+      }
+    }
+
+    ToolbarItem(placement: .topBarTrailing) {
+      CloseButtonToolbarItem {
+        dismiss()
+      }
+    }
+
+    ToolbarItemGroup(placement: .bottomBar) {
+      Spacer()
+      Link(destination: URL(string: "mailto:support@worktimes.app?subject=Feature%20Request")!) {
+        Text("feature-request.list.new-feature-request", bundle: .module)
+          .font(.footnote)
+          .fontWeight(.medium)
+      }
+      .buttonStyle(.bordered)
+      .buttonBorderShape(.capsule)
+    }
   }
 }
 

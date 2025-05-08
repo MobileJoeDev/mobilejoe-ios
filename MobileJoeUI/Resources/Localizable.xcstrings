@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "feature-request.list.new-feature-request" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Feature Request"
+          }
+        }
+      }
+    },
     "feature-request.list.sorting" : {
       "localizations" : {
         "en" : {
