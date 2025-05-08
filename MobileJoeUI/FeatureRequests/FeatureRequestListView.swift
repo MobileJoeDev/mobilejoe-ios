@@ -17,6 +17,7 @@ import MobileJoe
 
 public struct FeatureRequestListView: View {
   @State var featureRequests: FeatureRequests
+  let configuration: Configuration
 
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
@@ -37,12 +38,13 @@ public struct FeatureRequestListView: View {
     }
   }
 
-  public init() {
-    self.init(featureRequests: FeatureRequests())
+  public init(configuration: Configuration) {
+    self.init(featureRequests: FeatureRequests(), configuration: configuration)
   }
 
-  init(featureRequests: FeatureRequests) {
+  init(featureRequests: FeatureRequests, configuration: Configuration) {
     self.featureRequests = featureRequests
+    self.configuration = configuration
   }
 }
 
@@ -67,15 +69,17 @@ extension FeatureRequestListView {
       }
     }
 
-    ToolbarItemGroup(placement: .bottomBar) {
-      Spacer()
-      Link(destination: URL(string: "mailto:support@worktimes.app?subject=Feature%20Request")!) {
-        Text("feature-request.list.new-feature-request", bundle: .module)
-          .font(.footnote)
-          .fontWeight(.medium)
+    if let mailToURL = configuration.mailToURL {
+      ToolbarItemGroup(placement: .bottomBar) {
+        Spacer()
+        Link(destination: mailToURL) {
+          Text("feature-request.list.new-feature-request", bundle: .module)
+            .font(.footnote)
+            .fontWeight(.medium)
+        }
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.capsule)
       }
-      .buttonStyle(.bordered)
-      .buttonBorderShape(.capsule)
     }
   }
 }
@@ -101,5 +105,8 @@ extension FeatureRequestListView {
 }
 
 #Preview {
-  FeatureRequestListView(featureRequests: FeatureRequestsFixture())
+  FeatureRequestListView(
+    featureRequests: FeatureRequestsFixture(),
+    configuration: FeatureRequestListView.Configuration(recipients: ["support@mobilejoe.dev"])
+  )
 }
