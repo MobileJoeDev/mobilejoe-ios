@@ -20,7 +20,7 @@ class NetworkClient {
 
   private var apiKey: String = ""
   private var appUserID: String = ""
-  private static let serverHostURL = URL(string: "https://api.mobilejoe.dev")!
+  private static let serverHostURL = URL(string: "https://mbj-api.com")!
   private static let apiVersion = "v1"
 }
 
