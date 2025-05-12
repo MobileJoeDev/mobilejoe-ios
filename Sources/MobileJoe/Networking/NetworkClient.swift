@@ -12,14 +12,18 @@ class NetworkClient {
   static let shared = NetworkClient()
 
   @discardableResult
-  static func configure(withAPIKey apiKey: String, appUserID: String) -> NetworkClient {
+  static func configure(withAPIKey apiKey: String, appUserID: String?) -> NetworkClient {
     shared.apiKey = apiKey
-    shared.appUserID = appUserID
+    shared.identity = Identity.appUserID
     return shared
   }
 
+  static func identify(appUserID: String) {
+    shared.identity = I
+  }
+
   private var apiKey: String = ""
-  private var appUserID: String = ""
+  private var identity: Identity?
   private static let serverHostURL = URL(string: "https://mbj-api.com")!
   private static let apiVersion = "v1"
 }
@@ -40,7 +44,7 @@ extension NetworkClient {
 
   private func makeGetFeatureRequests() throws -> URLRequest {
     var components = try url(for: "feature_requests")
-    components.queryItems = [URLQueryItem(name: "user_id", value: appUserID.escaped)]
+    components.queryItems = [URLQueryItem(name: "identity", value: identity)]
     guard let url = components.url else {
       throw MobileJoeError.generic("Invalid URL")
     }
@@ -56,7 +60,7 @@ extension NetworkClient {
       throw MobileJoeError.generic("Invalid URL")
     }
     var request = urlRequest(for: url)
-    request.httpBody = try JSONEncoder().encode(["user_id": appUserID.escaped])
+    request.httpBody = try JSONEncoder().encode(["identity": identity])
     request.httpMethod = "POST"
     return request
   }

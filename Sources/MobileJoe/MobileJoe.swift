@@ -17,7 +17,11 @@ import Foundation
 @MainActor
 @Observable
 public class MobileJoe {
-  public static func configure(withAPIKey apiKey: String, appUserID: String) {
+  public static func configure(withAPIKey apiKey: String, appUserID: String?) {
     NetworkClient.configure(withAPIKey: apiKey, appUserID: appUserID)
+  }
+
+  public static func identify(appUserID: String) {
+    NetworkClient.identify(appUserID: appUserID)
   }
 }
