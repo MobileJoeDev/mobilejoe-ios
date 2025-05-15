@@ -12,20 +12,25 @@ class NetworkClient {
   static let shared = NetworkClient()
 
   @discardableResult
-  static func configure(withAPIKey apiKey: String, appUserID: String?) -> NetworkClient {
+  static func configure(withAPIKey apiKey: String, appUserID: String?) async throws -> NetworkClient {
     shared.apiKey = apiKey
-    shared.identity = Identity.appUserID
+    shared.identity = try await IdentityManager.shared.findOrCreate(with: appUserID)
     return shared
   }
 
-  static func identify(appUserID: String) {
-    shared.identity = I
+  static func identify(appUserID: String) async throws {
+    shared.identity = try await IdentityManager.shared.updateIfNeeded(shared.identity!, with: appUserID)
   }
+
+  static var isConfigured: Bool {
+    shared.apiKey.isNotEmpty
+  }
+
+  private static let serverHostURL = URL(string: "https://mbj-api.com")!
+  private static let apiVersion = "v1"
 
   private var apiKey: String = ""
   private var identity: Identity?
-  private static let serverHostURL = URL(string: "https://mbj-api.com")!
-  private static let apiVersion = "v1"
 }
 
 // MARK: - FeatureRequests
@@ -44,7 +49,11 @@ extension NetworkClient {
 
   private func makeGetFeatureRequests() throws -> URLRequest {
     var components = try url(for: "feature_requests")
-    components.queryItems = [URLQueryItem(name: "identity", value: identity)]
+    let identityData = try JSONEncoder().encode(identity)
+    guard let identityQueryParameter = String(data: identityData, encoding: .utf8) else {
+      throw MobileJoeError.generic("Could convert identity data to query parameter")
+    }
+    components.queryItems = [URLQueryItem(name: "identity", value: identityQueryParameter)]
     guard let url = components.url else {
       throw MobileJoeError.generic("Invalid URL")
     }

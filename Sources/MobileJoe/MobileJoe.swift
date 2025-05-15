@@ -18,10 +18,14 @@ import Foundation
 @Observable
 public class MobileJoe {
   public static func configure(withAPIKey apiKey: String, appUserID: String?) {
-    NetworkClient.configure(withAPIKey: apiKey, appUserID: appUserID)
+    Task {
+      try? await NetworkClient.configure(withAPIKey: apiKey, appUserID: appUserID)
+    }
   }
 
   public static func identify(appUserID: String) {
-    NetworkClient.identify(appUserID: appUserID)
+    Task {
+      try? await NetworkClient.identify(appUserID: appUserID)
+    }
   }
 }
