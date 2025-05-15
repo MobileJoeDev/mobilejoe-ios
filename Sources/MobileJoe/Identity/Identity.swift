@@ -17,5 +17,23 @@ import CryptoKit
 /// All identifiers are prefixed with a namespace to distinguish their type and source.
 struct Identity: Equatable, Codable {
   let anonymousID: String
-  var externalID: String?
+  private(set) var externalID: String?
+
+  init(externalID: String?) {
+    self.anonymousID = "$MBJAnonymousID:\(UUID().compactString)"
+    update(externalID: externalID)
+  }
+
+  mutating func update(externalID: String?) {
+    self.externalID = generateExternalID(from: externalID)
+  }
+
+  private static let anonymousRegex = #"\$MBJAnonymousID:([a-z0-9]{32})$"#
+}
+
+extension Identity {
+  private func generateExternalID(from id: String?) -> String? {
+    guard let id else { return nil }
+    return "$MBJExternalID:\(id.cleaned.sha256Truncated(length: 32))"
+  }
 }

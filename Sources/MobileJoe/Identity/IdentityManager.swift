@@ -28,7 +28,7 @@ class IdentityManager {
   func updateIfNeeded(_ identity: Identity, with appUserID: String?) async throws -> Identity {
     guard appUserID != identity.externalID else { return identity }
     var editableIdentity = identity
-    editableIdentity.externalID = appUserID
+    editableIdentity.update(externalID: appUserID)
     try await gateway.save(identity: editableIdentity)
     return editableIdentity
   }
@@ -46,19 +46,6 @@ extension IdentityManager {
   }
 
   private func makeIdentity(appUserID: String?) -> Identity {
-    let anonymousID = generateAnonymousID()
-    let externalID = generateExternalID(from: appUserID)
-    return Identity(anonymousID: anonymousID, externalID: externalID)
+    Identity(externalID: appUserID)
   }
-
-  private func generateExternalID(from appUserID: String?) -> String? {
-    guard let appUserID else { return nil }
-    return "$MBJExternalID:\(appUserID.cleaned.sha256Truncated(length: 32))"
-  }
-
-  private func generateAnonymousID() -> String {
-    "$MBJAnonymousID:\(UUID().compactString)"
-  }
-
-  private static let anonymousRegex = #"\$MBJAnonymousID:([a-z0-9]{32})$"#
 }
