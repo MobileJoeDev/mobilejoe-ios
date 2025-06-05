@@ -18,16 +18,20 @@ protocol IdentityGateway {
 @MainActor
 class FileBasedIdentityGateway: IdentityGateway {
   static let shared = FileBasedIdentityGateway()
-  
-  private static let identityURL = URL.applicationSupportDirectory.appending(path: "identity.mbj")
+
+  private static let mbjDirectory = URL.applicationSupportDirectory.appending(path: "MobileJoe")
+  private static let identityURL = mbjDirectory.appending(path: "identity.mbj")
   private let logger: Logger
   private let fileCoordinator: NSFileCoordinator
-  
+  private let fileManager: FileManager
+
   private init() {
     self.fileCoordinator = NSFileCoordinator()
+    self.fileManager = .default
     self.logger = Logger(subsystem: "MobileJoe", category: "FileBasedIdentityGateway")
+    findOrCreateIdentityURL()
   }
-  
+
   func find() async throws -> Identity? {
     var error: NSError? = nil
     var identity: Identity?
@@ -39,43 +43,51 @@ class FileBasedIdentityGateway: IdentityGateway {
         logger.error("Failed to find identity file. Error: \(error.localizedDescription)")
       }
     }
-    
+
     if let error {
       throw error
     }
-    
+
     return identity
   }
-  
+
   func save(identity: Identity) async throws {
     var error: NSError? = nil
     fileCoordinator.coordinate(writingItemAt: Self.identityURL, options: .forMerging, error: &error) { url in
       do {
         let identityData = try JSONEncoder().encode(identity)
-        try identityData.write(to: url, options: .atomic)
+        try identityData.write(to: url, options: [.atomic])
       } catch {
         logger.error("Failed to save identity file. Error: \(error.localizedDescription)")
       }
     }
-    
+
     if let error {
       throw error
     }
   }
-  
+
   func delete() async throws {
     var error: NSError? = nil
-    
+
     fileCoordinator.coordinate(writingItemAt: Self.identityURL, options: .forDeleting, error: &error) { url in
       do {
-        try FileManager.default.removeItem(at: url)
+        try fileManager.removeItem(at: url)
       } catch {
         logger.error("Failed to delete identity file. Error: \(error.localizedDescription)")
       }
     }
-    
+
     if let error {
       throw error
+    }
+  }
+
+  private func findOrCreateIdentityURL() {
+    do {
+      try fileManager.createDirectory(at: Self.mbjDirectory, withIntermediateDirectories: false)
+    } catch {
+      logger.error("Failed to create MobileJoe support directory")
     }
   }
 }
