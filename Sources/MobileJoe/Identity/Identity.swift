@@ -28,6 +28,18 @@ struct Identity: Equatable, Codable {
     self.externalID = generateExternalID(from: externalID)
   }
 
+  var idStringRepresentation: String {
+    ids.joined(separator: ",")
+  }
+
+  var ids: [String] {
+    var id = [anonymousID]
+    if let externalID {
+      id.append(externalID)
+    }
+    return id
+  }
+
   private static let anonymousRegex = #"\$MBJAnonymousID:([a-z0-9]{32})$"#
 }
 

@@ -49,11 +49,10 @@ extension NetworkClient {
 
   private func makeGetFeatureRequests() throws -> URLRequest {
     var components = try url(for: "feature_requests")
-    let identityData = try JSONEncoder().encode(identity)
-    guard let identityQueryParameter = String(data: identityData, encoding: .utf8) else {
-      throw MobileJoeError.generic("Could convert identity data to query parameter")
+    guard let identifiersQueryParameter = identity?.idStringRepresentation else {
+      throw MobileJoeError.generic("Could not generate identifiers")
     }
-    components.queryItems = [URLQueryItem(name: "identity", value: identityQueryParameter)]
+    components.queryItems = [URLQueryItem(name: "identifiers", value: identifiersQueryParameter)]
     guard let url = components.url else {
       throw MobileJoeError.generic("Invalid URL")
     }
@@ -68,8 +67,11 @@ extension NetworkClient {
     guard let url = components.url else {
       throw MobileJoeError.generic("Invalid URL")
     }
+    guard let identifiersParameter = identity?.idStringRepresentation else {
+      throw MobileJoeError.generic("Could not generate identifiers")
+    }
     var request = urlRequest(for: url)
-    request.httpBody = try JSONEncoder().encode(["identity": identity])
+    request.httpBody = try JSONEncoder().encode(["identifiers": identifiersParameter])
     request.httpMethod = "POST"
     return request
   }
