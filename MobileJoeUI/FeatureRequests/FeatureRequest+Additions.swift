@@ -9,7 +9,7 @@
 //
 //  FeatureRequest+Additions.swift
 //
-//  Created by Florian on 02.04.25.
+//  Created by Florian Mielke on 02.04.25.
 //
 
 import SwiftUI

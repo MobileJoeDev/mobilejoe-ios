@@ -9,7 +9,7 @@
 //
 //  UUID+Additions.swift
 //
-//  Created by Florian on 11.05.25.
+//  Created by Florian Mielke on 11.05.25.
 //
 
 import Foundation

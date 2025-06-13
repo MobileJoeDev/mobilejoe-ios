@@ -9,7 +9,7 @@
 //
 //  MobileJoe.swift
 //
-//  Created by Florian on 20.03.25.
+//  Created by Florian Mielke on 20.03.25.
 //
 
 import Foundation
@@ -19,13 +19,13 @@ import Foundation
 public class MobileJoe {
   public static func configure(withAPIKey apiKey: String, appUserID: String?) {
     Task {
-      try? await NetworkClient.configure(withAPIKey: apiKey, appUserID: appUserID)
+      try? await NetworkClient.configure(withAPIKey: apiKey, externalID: appUserID)
     }
   }
 
   public static func identify(appUserID: String) {
     Task {
-      try? await NetworkClient.identify(appUserID: appUserID)
+      try? await NetworkClient.identify(externalID: appUserID)
     }
   }
 }

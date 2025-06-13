@@ -1,8 +1,15 @@
 //
-//  File.swift
-//  MobileJoe
+//  Copyright Florian Mielke. All Rights Reserved.
 //
-//  Created by Florian on 11.05.25.
+//  Licensed under the MIT License (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      https://opensource.org/licenses/MIT
+//
+//  IdentityGateway.swift
+//
+//  Created by Florian Mielke on 11.05.25.
 //
 
 import Foundation

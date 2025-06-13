@@ -9,7 +9,7 @@
 //
 //  FeatureRequest.swift
 //
-//  Created by Florian on 20.03.25.
+//  Created by Florian Mielke on 20.03.25.
 //
 
 import Foundation

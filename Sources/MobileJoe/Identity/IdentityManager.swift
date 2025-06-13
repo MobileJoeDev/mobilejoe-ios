@@ -1,8 +1,15 @@
 //
-//  File.swift
-//  MobileJoe
+//  Copyright Florian Mielke. All Rights Reserved.
 //
-//  Created by Florian on 15.05.25.
+//  Licensed under the MIT License (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      https://opensource.org/licenses/MIT
+//
+//  IdentityManager.swift
+//
+//  Created by Florian Mielke on 20.03.25.
 //
 
 import Foundation
@@ -17,20 +24,12 @@ class IdentityManager {
     self.gateway = gateway
   }
 
-  func findOrCreate(with appUserID: String?) async throws -> Identity {
+  func findOrCreate(by externalID: String?) async throws -> Identity {
     if let identity = try await gateway.find() {
-      return try await updateIfNeeded(identity, with: appUserID)
+      return try await updateIfNeeded(identity, with: externalID)
     } else {
-      return try await createIdentity(with: appUserID)
+      return try await createIdentity(with: externalID)
     }
-  }
-
-  func updateIfNeeded(_ identity: Identity, with appUserID: String?) async throws -> Identity {
-    guard appUserID != identity.externalID else { return identity }
-    var editableIdentity = identity
-    editableIdentity.update(externalID: appUserID)
-    try await gateway.save(identity: editableIdentity)
-    return editableIdentity
   }
 
   func reset() async throws {
@@ -39,6 +38,14 @@ class IdentityManager {
 }
 
 extension IdentityManager {
+  private func updateIfNeeded(_ identity: Identity, with externalID: String?) async throws -> Identity {
+    guard externalID != identity.externalID else { return identity }
+    var editableIdentity = identity
+    editableIdentity.update(externalID: externalID)
+    try await gateway.save(identity: editableIdentity)
+    return editableIdentity
+  }
+
   private func createIdentity(with appUserID: String?) async throws -> Identity {
     let identity = makeIdentity(appUserID: appUserID)
     try await gateway.save(identity: identity)

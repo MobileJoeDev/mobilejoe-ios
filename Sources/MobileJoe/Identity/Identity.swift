@@ -1,8 +1,15 @@
 //
-//  File.swift
-//  MobileJoe
+//  Copyright Florian Mielke. All Rights Reserved.
 //
-//  Created by Florian on 09.05.25.
+//  Licensed under the MIT License (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      https://opensource.org/licenses/MIT
+//
+//  Identity.swift
+//
+//  Created by Florian Mielke on 09.05.25.
 //
 
 import Foundation
@@ -32,20 +39,18 @@ struct Identity: Equatable, Codable {
     ids.joined(separator: ",")
   }
 
-  var ids: [String] {
+  private var ids: [String] {
     var id = [anonymousID]
     if let externalID {
       id.append(externalID)
     }
     return id
   }
-
-  private static let anonymousRegex = #"\$MBJAnonymousID:([a-z0-9]{32})$"#
 }
 
 extension Identity {
   private func generateExternalID(from id: String?) -> String? {
     guard let id else { return nil }
-    return "$MBJExternalID:\(id.cleaned.sha256Truncated(length: 32))"
+    return "$MBJExternalID:\(id.sha256Truncated(length: 32))"
   }
 }

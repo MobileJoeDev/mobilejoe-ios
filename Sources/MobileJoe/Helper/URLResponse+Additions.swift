@@ -9,7 +9,7 @@
 //
 //  URLResponse+Additions.swift
 //
-//  Created by Florian on 08.05.25.
+//  Created by Florian Mielke on 08.05.25.
 //
 
 import Foundation

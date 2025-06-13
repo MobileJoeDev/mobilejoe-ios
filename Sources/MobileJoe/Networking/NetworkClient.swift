@@ -1,8 +1,15 @@
 //
-//  File.swift
-//  MobileJoe
+//  Copyright Florian Mielke. All Rights Reserved.
 //
-//  Created by Florian on 20.03.25.
+//  Licensed under the MIT License (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      https://opensource.org/licenses/MIT
+//
+//  NetworkClient.swift
+//
+//  Created by Florian Mielke on 20.03.25.
 //
 
 import Foundation
@@ -12,14 +19,14 @@ class NetworkClient {
   static let shared = NetworkClient()
 
   @discardableResult
-  static func configure(withAPIKey apiKey: String, appUserID: String?) async throws -> NetworkClient {
+  static func configure(withAPIKey apiKey: String, externalID: String?) async throws -> NetworkClient {
     shared.apiKey = apiKey
-    shared.identity = try await IdentityManager.shared.findOrCreate(with: appUserID)
+    shared.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
     return shared
   }
 
-  static func identify(appUserID: String) async throws {
-    shared.identity = try await IdentityManager.shared.updateIfNeeded(shared.identity!, with: appUserID)
+  static func identify(externalID: String) async throws {
+    shared.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
   }
 
   static var isConfigured: Bool {
@@ -31,19 +38,24 @@ class NetworkClient {
 
   private var apiKey: String = ""
   private var identity: Identity?
+  private let router: Router
+
+  init(router: Router = DefaultRouter()) {
+    self.router = router
+  }
 }
 
 // MARK: - FeatureRequests
 extension NetworkClient {
   func getFeatureRequests() async throws -> Data {
     let request = try makeGetFeatureRequests()
-    let response = try await perform(request)
+    let response = try await router.perform(request)
     return response.0
   }
 
   func postVoteFeatureRequests(featureRequestID: Int) async throws -> Data {
     let request = try makePostVoteFeatureRequest(for: featureRequestID)
-    let response = try await perform(request)
+    let response = try await router.perform(request)
     return response.0
   }
 
@@ -79,14 +91,6 @@ extension NetworkClient {
 
 // MARK: - Helper
 extension NetworkClient {
-  private func perform(_ request: URLRequest) async throws -> (Data, URLResponse) {
-    let response = try await URLSession.shared.data(for: request)
-    guard response.1.isOK else {
-      throw MobileJoeError.generic("Invalid response: \(response.1)")
-    }
-    return response
-  }
-
   private func urlRequest(for url: URL) -> URLRequest {
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
