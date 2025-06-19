@@ -1,5 +1,5 @@
 //
-//  Copyright Florian Mielke. All Rights Reserved.
+//  Copyright Bytekontor GmbH. All Rights Reserved.
 //
 //  Licensed under the MIT License (the "License");
 //  you may not use this file except in compliance with the License.
