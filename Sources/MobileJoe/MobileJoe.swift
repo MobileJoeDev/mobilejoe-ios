@@ -17,7 +17,7 @@ import Foundation
 @MainActor
 @Observable
 public class MobileJoe {
-  public static func configure(withAPIKey apiKey: String, appUserID: String?) {
+  public static func configure(withAPIKey apiKey: String, appUserID: String? = nil) {
     Task {
       try? await NetworkClient.configure(withAPIKey: apiKey, externalID: appUserID)
     }
