@@ -13,6 +13,7 @@
 //
 
 import Foundation
+import OSLog
 
 @MainActor
 class NetworkClient {
@@ -39,6 +40,7 @@ class NetworkClient {
   private var apiKey: String = ""
   private var identity: Identity?
   private let router: Router
+  private let logger: Logger = Logger(subsystem: "MobileJoe", category: "NetworkClient")
 
   init(router: Router = DefaultRouter()) {
     self.router = router
@@ -48,51 +50,44 @@ class NetworkClient {
 // MARK: - FeatureRequests
 extension NetworkClient {
   func getFeatureRequests() async throws -> Data {
-    let request = try makeGetFeatureRequests()
-    let response = try await router.perform(request)
-    return response.0
+    var components = try url(for: "feature_requests")
+    let identifiersQueryItem = try identifiersQueryItem()
+    components.queryItems = [identifiersQueryItem]
+    guard let url = components.url else { throw MobileJoeError.invalidURL }
+    return try await perform(urlRequest(for: url, httpMethod: .get))
   }
 
   func postVoteFeatureRequests(featureRequestID: Int) async throws -> Data {
-    let request = try makePostVoteFeatureRequest(for: featureRequestID)
-    let response = try await router.perform(request)
-    return response.0
-  }
-
-  private func makeGetFeatureRequests() throws -> URLRequest {
-    var components = try url(for: "feature_requests")
-    guard let identifiersQueryParameter = identity?.idStringRepresentation else {
-      throw MobileJoeError.generic("Could not generate identifiers")
-    }
-    components.queryItems = [URLQueryItem(name: "identifiers", value: identifiersQueryParameter)]
-    guard let url = components.url else {
-      throw MobileJoeError.generic("Invalid URL")
-    }
-
-    var request = urlRequest(for: url)
-    request.httpMethod = "GET"
-    return request
-  }
-
-  private func makePostVoteFeatureRequest(for featureRequestID: Int) throws -> URLRequest {
     let components = try url(for: "feature_requests/\(featureRequestID)/vote")
-    guard let url = components.url else {
-      throw MobileJoeError.generic("Invalid URL")
-    }
-    guard let identifiersParameter = identity?.idStringRepresentation else {
-      throw MobileJoeError.generic("Could not generate identifiers")
-    }
-    var request = urlRequest(for: url)
-    request.httpBody = try JSONEncoder().encode(["identifiers": identifiersParameter])
-    request.httpMethod = "POST"
-    return request
+    guard let url = components.url else { throw MobileJoeError.invalidURL }
+    let identifiersBodyValue = try identifiersBodyValue()
+    var request = urlRequest(for: url, httpMethod: .post)
+    request.httpBody = try JSONEncoder().encode(identifiersBodyValue)
+    return try await perform(request)
   }
 }
 
 // MARK: - Helper
 extension NetworkClient {
-  private func urlRequest(for url: URL) -> URLRequest {
+  private func identifiersBodyValue() throws -> [String: String] {
+    guard let identifiersParameter = identity?.idStringRepresentation else { throw MobileJoeError.invalidIdentity }
+    return ["identifiers": identifiersParameter]
+  }
+
+  private func identifiersQueryItem() throws -> URLQueryItem {
+    guard let identifiersQueryParameter = identity?.idStringRepresentation else { throw MobileJoeError.invalidIdentity }
+    return URLQueryItem(name: "identifiers", value: identifiersQueryParameter)
+  }
+
+  private func perform(_ request: URLRequest) async throws -> Data {
+    guard NetworkClient.isConfigured else { throw MobileJoeError.notConfigured }
+    let response = try await router.perform(request)
+    return response.0
+  }
+
+  private func urlRequest(for url: URL, httpMethod: HTTPMethod) -> URLRequest {
     var request = URLRequest(url: url)
+    request.httpMethod = httpMethod.rawValue
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
     return request
@@ -108,7 +103,8 @@ extension NetworkClient {
 }
 
 extension NetworkClient {
-  struct Request {
-
+  enum HTTPMethod: String {
+    case get = "GET"
+    case post = "POST"
   }
 }

@@ -20,9 +20,13 @@ struct IdentityTests {
     @Test func withExternalID() async throws {
       let identity = Identity(externalID: "my-external-id-1")
 
+      #expect(identity.anonymousID.hasPrefix("$MBJAnonymousID:"))
+      #expect(identity.anonymousID.count == 48)
+
       let externalID = try #require(identity.externalID)
       #expect(externalID.hasPrefix("$MBJExternalID:"))
-      #expect(identity.anonymousID.hasPrefix("$MBJAnonymousID:"))
+      #expect(externalID.contains("my-external-id-1") == false)
+      #expect(externalID.count == 47)
     }
 
     @Test func withoutExternalID() async throws {

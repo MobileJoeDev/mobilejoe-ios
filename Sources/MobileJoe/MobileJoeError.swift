@@ -14,13 +14,9 @@
 
 import Foundation
 
-enum MobileJoeError: Error, LocalizedError {
+enum MobileJoeError: Error {
+  case notConfigured
+  case invalidIdentity
+  case invalidURL
   case generic(String)
-
-  var errorDescription: String? {
-    switch self {
-    case .generic(let string):
-      return string
-    }
-  }
 }
