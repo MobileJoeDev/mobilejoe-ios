@@ -20,7 +20,7 @@ public class FeatureRequests {
   private let gateway: FeatureRequestGateway
 
   public init(gateway: FeatureRequestGateway? = nil) {
-    self.gateway = gateway ?? InMemoryFeatureRequestGateway.shared
+    self.gateway = gateway ?? RemoteFeatureRequestGateway.shared
   }
 
   public func load() async throws {

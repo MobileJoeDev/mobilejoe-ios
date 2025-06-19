@@ -22,8 +22,8 @@ public protocol FeatureRequestGateway {
 }
 
 @MainActor
-class InMemoryFeatureRequestGateway: FeatureRequestGateway {
-  static var shared = InMemoryFeatureRequestGateway()
+class RemoteFeatureRequestGateway: FeatureRequestGateway {
+  static var shared = RemoteFeatureRequestGateway()
 
   private var container: Set<FeatureRequest>
   private let parser: FeatureRequestParser
