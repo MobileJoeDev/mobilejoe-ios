@@ -12,6 +12,26 @@
         }
       }
     },
+    "feature-request-list.failure.text" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong."
+          }
+        }
+      }
+    },
+    "feature-request-list.failure.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorry!"
+          }
+        }
+      }
+    },
     "feature-request-list.no-items.text" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -66,7 +86,7 @@
         }
       }
     },
-    "feature-request.list.sorting.by-date" : {
+    "feature-request.list.sorting.by-newest" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {

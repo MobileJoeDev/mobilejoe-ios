@@ -18,14 +18,14 @@ import MobileJoe
 extension FeatureRequests.Sorting {
   var title: String {
     switch self {
-    case .byDate: String(localized: "feature-request.list.sorting.by-date", bundle: .module)
+    case .byNewest: String(localized: "feature-request.list.sorting.by-newest", bundle: .module)
     case .byScore: String(localized: "feature-request.list.sorting.by-score", bundle: .module)
     }
   }
 
   var systemImage: String {
     switch self {
-    case .byDate: "calendar"
+    case .byNewest: "calendar"
     case .byScore: "number"
     }
   }

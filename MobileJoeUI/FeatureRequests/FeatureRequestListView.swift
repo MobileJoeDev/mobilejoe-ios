@@ -40,7 +40,6 @@ public struct FeatureRequestListView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: ToolbarItems)
     }
-    .errorAlert(error: $error)
     .task {
       await fetchFeatureRequests()
     }
@@ -95,12 +94,22 @@ extension FeatureRequestListView {
   func Overlay() -> some View {
     if isLoading {
       ProgressView(String(localized: "feature-request.list.loading", bundle: .module))
+    } else if let error {
+      FailureView()
     } else if featureRequests.all.isEmpty {
       NoFeatureRequestsView()
     }
   }
 
-  func NoFeatureRequestsView() -> some View {
+  private func FailureView() -> some View {
+    ContentUnavailableView(
+      String(localized: "feature-request-list.failure.title", bundle: .module),
+      systemImage: "exclamationmark.triangle",
+      description: Text("feature-request-list.failure.text", bundle: .module)
+    )
+  }
+
+  private func NoFeatureRequestsView() -> some View {
     ContentUnavailableView(
       String(localized: "feature-request-list.no-items.title", bundle: .module),
       systemImage: "magnifyingglass",
@@ -111,8 +120,9 @@ extension FeatureRequestListView {
 
 extension FeatureRequestListView {
   private func fetchFeatureRequests() async {
-    defer { isLoading = false }
     do {
+      resetError()
+      defer { isLoading = false }
       isLoading = true
       try await featureRequests.load()
     } catch {
@@ -121,6 +131,7 @@ extension FeatureRequestListView {
   }
 
   private func vote(_ featureRequest: FeatureRequest) {
+    resetError()
     Task {
       do {
         try await featureRequests.vote(featureRequest)
@@ -128,6 +139,10 @@ extension FeatureRequestListView {
         self.error = error
       }
     }
+  }
+
+  private func resetError() {
+    error = nil
   }
 }
 
@@ -141,6 +156,13 @@ extension FeatureRequestListView {
 #Preview("Empty") {
   FeatureRequestListView(
     featureRequests: FeatureRequestsFixture.empty,
+    configuration: FeatureRequestListView.Configuration(recipients: ["support@mobilejoe.dev"])
+  )
+}
+
+#Preview("Failure") {
+  FeatureRequestListView(
+    featureRequests: FeatureRequestsFixture.failedLoading,
     configuration: FeatureRequestListView.Configuration(recipients: ["support@mobilejoe.dev"])
   )
 }

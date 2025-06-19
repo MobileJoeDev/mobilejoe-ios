@@ -11,7 +11,7 @@ import Foundation
 @Observable
 public class FeatureRequests {
   public var all: [FeatureRequest] = []
-  public var sorting: Sorting = .byDate {
+  public var sorting: Sorting = .byNewest {
     didSet {
       applySorting(all)
     }
@@ -41,14 +41,14 @@ public class FeatureRequests {
 
 extension FeatureRequests {
   public enum Sorting: CaseIterable, Identifiable {
-    case byDate
+    case byNewest
     case byScore
 
     public var id: Self { self }
 
     func sorted(_ featureRequest: [FeatureRequest]) -> [FeatureRequest] {
       switch self {
-      case .byDate: sortByDate(featureRequest)
+      case .byNewest: sortByNewest(featureRequest)
       case .byScore: sortByScore(featureRequest)
       }
     }
@@ -62,12 +62,12 @@ extension FeatureRequests {
       }
     }
 
-    private func sortByDate(_ featureRequests: [FeatureRequest]) -> [FeatureRequest] {
+    private func sortByNewest(_ featureRequests: [FeatureRequest]) -> [FeatureRequest] {
       featureRequests.sorted { lhs, rhs in
-        if lhs.updatedAt == rhs.updatedAt {
+        if lhs.createdAt == rhs.createdAt {
           return lhs.id < rhs.id
         }
-        return lhs.updatedAt > rhs.updatedAt
+        return lhs.createdAt > rhs.createdAt
       }
     }
   }

@@ -17,6 +17,12 @@ import Foundation
 public class FeatureRequestsFixture: FeatureRequests {
   public static var empty = FeatureRequestsFixture()
 
+  public static var failedLoading = {
+    let fixture = FeatureRequestsFixture()
+    fixture.loadError = MobileJoeError.generic("Failed loading")
+    return fixture
+  }()
+
   public static var all: FeatureRequestsFixture {
     let fr = FeatureRequestsFixture()
     fr.all = [
@@ -26,6 +32,7 @@ public class FeatureRequestsFixture: FeatureRequests {
         body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",
         score: 10,
         status: "Open",
+        createdAt: Calendar.utc.date(year: 2025, month: 3, day: 17, hour: 12)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 12)!,
         isVoted: true,
         statusHexColor: "#FF0000"
@@ -36,7 +43,8 @@ public class FeatureRequestsFixture: FeatureRequests {
         body: "Sync records and accounts via iCloud on multiple devices.",
         score: 33,
         status: "Planned",
-        updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 13)!,
+        createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 13)!,
+        updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 18, hour: 13)!,
         isVoted: false,
         statusHexColor: "#FF0000"
       ),
@@ -44,7 +52,9 @@ public class FeatureRequestsFixture: FeatureRequests {
     return fr
   }
 
+  private var loadError: Error? = nil
   public override func load() async throws {
+    if let loadError { throw loadError }
   }
 
   public override func vote(_ featureRequest: FeatureRequest) async throws {
@@ -59,7 +69,8 @@ extension FeatureRequest {
       body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",
       score: 10,
       status: "Open",
-      updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 11)!,
+      createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 11)!,
+      updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 16, hour: 11)!,
       isVoted: isVoted,
       statusHexColor: "#FF0000"
     )

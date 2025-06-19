@@ -20,6 +20,7 @@ public struct FeatureRequest: Identifiable, Hashable, Codable, Sendable {
   public let body: String
   public let score: Int
   public let status: String
+  public let createdAt: Date
   public let updatedAt: Date
   public let isVoted: Bool
   public let statusHexColor: String
@@ -31,6 +32,7 @@ public struct FeatureRequest: Identifiable, Hashable, Codable, Sendable {
     case score
     case status
     case statusHexColor = "status_color"
+    case createdAt = "created_at"
     case updatedAt = "updated_at"
     case isVoted = "voted"
   }
