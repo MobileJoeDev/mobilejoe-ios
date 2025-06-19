@@ -30,6 +30,9 @@ public struct FeatureRequestListView: View {
           FeatureRequestListRow(feature: feature) { vote($0) }
         }
       }
+      .refreshable {
+        await fetchFeatureRequests()
+      }
       .overlay {
         Overlay()
       }
