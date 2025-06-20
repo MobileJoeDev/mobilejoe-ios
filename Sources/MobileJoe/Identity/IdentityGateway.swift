@@ -47,7 +47,7 @@ class FileBasedIdentityGateway: IdentityGateway {
         let identityData = try Data(contentsOf: url)
         identity = try JSONDecoder().decode(Identity.self, from: identityData)
       } catch {
-        logger.error("Failed to find identity file. Error: \(error.localizedDescription)")
+        logger.error("Joe says: Failed to find identity file. Error: \(error.localizedDescription)")
       }
     }
 
@@ -65,7 +65,7 @@ class FileBasedIdentityGateway: IdentityGateway {
         let identityData = try JSONEncoder().encode(identity)
         try identityData.write(to: url, options: [.atomic])
       } catch {
-        logger.error("Failed to save identity file. Error: \(error.localizedDescription)")
+        logger.error("Joe says: Failed to save identity file. Error: \(error.localizedDescription)")
       }
     }
 
@@ -76,12 +76,11 @@ class FileBasedIdentityGateway: IdentityGateway {
 
   func delete() async throws {
     var error: NSError? = nil
-
     fileCoordinator.coordinate(writingItemAt: Self.identityURL, options: .forDeleting, error: &error) { url in
       do {
         try fileManager.removeItem(at: url)
       } catch {
-        logger.error("Failed to delete identity file. Error: \(error.localizedDescription)")
+        logger.error("Joe says: Failed to delete identity file. Error: \(error.localizedDescription)")
       }
     }
 
@@ -94,7 +93,7 @@ class FileBasedIdentityGateway: IdentityGateway {
     do {
       try fileManager.createDirectory(at: Self.mbjDirectory, withIntermediateDirectories: false)
     } catch {
-      logger.error("Failed to create MobileJoe support directory")
+      logger.error("Joe says: Failed to create MobileJoe support directory.")
     }
   }
 }
