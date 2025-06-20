@@ -17,6 +17,6 @@ import MobileJoe
 
 extension FeatureRequest {
   var statusColor: Color {
-    Color(hex: "\(statusHexColor)ff") ?? .blue
+    Color(hex: statusHexColor) ?? .accentColor
   }
 }
