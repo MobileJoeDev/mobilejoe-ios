@@ -16,7 +16,8 @@ import Foundation
 
 enum MobileJoeError: Error {
   case notConfigured
-  case invalidIdentity
-  case invalidURL
+  case unknownIdentity
+  case invalidURL(components: URLComponents)
+  case notOkURLResponse(description: String)
   case generic(String)
 }

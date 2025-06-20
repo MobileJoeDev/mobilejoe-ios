@@ -22,11 +22,11 @@ class NetworkClient {
   @discardableResult
   static func configure(withAPIKey apiKey: String, externalID: String?) async throws -> NetworkClient {
     shared.apiKey = apiKey
-    shared.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
+    try await NetworkClient.identify(externalID: externalID)
     return shared
   }
 
-  static func identify(externalID: String) async throws {
+  static func identify(externalID: String?) async throws {
     shared.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
   }
 
@@ -53,13 +53,13 @@ extension NetworkClient {
     var components = try url(for: "feature_requests")
     let identifiersQueryItem = try identifiersQueryItem()
     components.queryItems = [identifiersQueryItem]
-    guard let url = components.url else { throw MobileJoeError.invalidURL }
+    guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
     return try await perform(urlRequest(for: url, httpMethod: .get))
   }
 
   func postVoteFeatureRequests(featureRequestID: Int) async throws -> Data {
     let components = try url(for: "feature_requests/\(featureRequestID)/vote")
-    guard let url = components.url else { throw MobileJoeError.invalidURL }
+    guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
     let identifiersBodyValue = try identifiersBodyValue()
     var request = urlRequest(for: url, httpMethod: .post)
     request.httpBody = try JSONEncoder().encode(identifiersBodyValue)
@@ -70,12 +70,12 @@ extension NetworkClient {
 // MARK: - Helper
 extension NetworkClient {
   private func identifiersBodyValue() throws -> [String: String] {
-    guard let identifiersParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.invalidIdentity }
+    guard let identifiersParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.unknownIdentity }
     return ["identifiers": identifiersParameter]
   }
 
   private func identifiersQueryItem() throws -> URLQueryItem {
-    guard let identifiersQueryParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.invalidIdentity }
+    guard let identifiersQueryParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.unknownIdentity }
     return URLQueryItem(name: "identifiers", value: identifiersQueryParameter)
   }
 

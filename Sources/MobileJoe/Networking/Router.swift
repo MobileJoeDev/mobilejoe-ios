@@ -19,12 +19,11 @@ protocol Router {
   func perform(_ request: URLRequest) async throws -> (Data, URLResponse)
 }
 
-
 class DefaultRouter: Router {
   func perform(_ request: URLRequest) async throws -> (Data, URLResponse) {
     let response = try await URLSession.shared.data(for: request)
     guard response.1.isOK else {
-      throw MobileJoeError.generic("Invalid response: \(response.1)")
+      throw MobileJoeError.notOkURLResponse(description: response.1.description)
     }
     return response
   }
