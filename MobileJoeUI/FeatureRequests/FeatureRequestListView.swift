@@ -91,22 +91,14 @@ extension FeatureRequestListView {
   }
 
   @ViewBuilder
-  func Overlay() -> some View {
+  private func Overlay() -> some View {
     if isLoading {
       ProgressView(String(localized: "feature-request.list.loading", bundle: .module))
     } else if error != nil {
-      ContentUnavailableFailureView()
+      JoeContentUnavailableFailureView()
     } else if featureRequests.all.isEmpty {
-      NoFeatureRequestsView()
+      JoeContentUnavailableView(title: "feature-request-list.no-items.title", text: "feature-request-list.no-items.text")
     }
-  }
-
-  private func NoFeatureRequestsView() -> some View {
-    ContentUnavailableView(
-      String(localized: "feature-request-list.no-items.title", bundle: .module),
-      systemImage: "magnifyingglass",
-      description: Text("feature-request-list.no-items.text", bundle: .module)
-    )
   }
 }
 
