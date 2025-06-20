@@ -27,15 +27,15 @@ struct Identity: Equatable, Codable {
   private(set) var externalID: String?
 
   init(externalID: String?) {
-    self.anonymousID = "$MBJAnonymousID:\(UUID().compactString)"
+    anonymousID = "$MBJAnonymousID:\(UUID().compactString)"
     update(externalID: externalID)
   }
 
   mutating func update(externalID: String?) {
-    self.externalID = generateExternalID(from: externalID)
+    self.externalID = Self.generateExternalID(from: externalID)
   }
 
-  var idStringRepresentation: String {
+  var identifiersStringRepresentation: String {
     ids.joined(separator: ",")
   }
 
@@ -49,7 +49,10 @@ struct Identity: Equatable, Codable {
 }
 
 extension Identity {
-  private func generateExternalID(from id: String?) -> String? {
+  static let anonymousIDPattern = #"\$MBJAnonymousID:([a-z0-9]{32})$"#
+  static let externalIDPattern = #"\$MBJExternalID:([a-z0-9]{32})$"#
+
+  static func generateExternalID(from id: String?) -> String? {
     guard let id else { return nil }
     return "$MBJExternalID:\(id.sha256Truncated(length: 32))"
   }

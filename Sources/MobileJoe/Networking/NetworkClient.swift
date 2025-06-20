@@ -70,12 +70,12 @@ extension NetworkClient {
 // MARK: - Helper
 extension NetworkClient {
   private func identifiersBodyValue() throws -> [String: String] {
-    guard let identifiersParameter = identity?.idStringRepresentation else { throw MobileJoeError.invalidIdentity }
+    guard let identifiersParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.invalidIdentity }
     return ["identifiers": identifiersParameter]
   }
 
   private func identifiersQueryItem() throws -> URLQueryItem {
-    guard let identifiersQueryParameter = identity?.idStringRepresentation else { throw MobileJoeError.invalidIdentity }
+    guard let identifiersQueryParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.invalidIdentity }
     return URLQueryItem(name: "identifiers", value: identifiersQueryParameter)
   }
 

@@ -16,24 +16,41 @@ import Testing
 @testable import MobileJoe
 
 struct IdentityTests {
-  @Suite struct Creation {
-    @Test func withExternalID() async throws {
-      let identity = Identity(externalID: "my-external-id-1")
+  @Test func create_withExternalID() throws {
+    let identity = Identity(externalID: "external-id")
 
-      #expect(identity.anonymousID.hasPrefix("$MBJAnonymousID:"))
-      #expect(identity.anonymousID.count == 48)
+    #expect(isAnonymousID(identity.anonymousID))
+    #expect(isExternalID(identity.externalID))
+  }
 
-      let externalID = try #require(identity.externalID)
-      #expect(externalID.hasPrefix("$MBJExternalID:"))
-      #expect(externalID.contains("my-external-id-1") == false)
-      #expect(externalID.count == 47)
-    }
+  @Test func create_withoutExternalID() throws {
+    let identity = Identity(externalID: nil)
 
-    @Test func withoutExternalID() async throws {
-      let identity = Identity(externalID: nil)
+    #expect(identity.externalID == nil)
+    #expect(isAnonymousID(identity.anonymousID))
+  }
 
-      #expect(identity.externalID == nil)
-      #expect(identity.anonymousID.hasPrefix("$MBJAnonymousID:"))
-    }
+  @Test func stringRepresentation_withExternalID() throws {
+    let identity = Identity(externalID: "external-id")
+
+    let externalID = try #require(identity.externalID)
+    #expect(identity.identifiersStringRepresentation == "\(identity.anonymousID),\(externalID)")
+  }
+
+  @Test func stringRepresentation_withoutExternalID() throws {
+    let identity = Identity(externalID: nil)
+
+    #expect(identity.identifiersStringRepresentation == identity.anonymousID)
+  }
+}
+
+extension IdentityTests {
+  private func isAnonymousID(_ anonymousID: String) -> Bool {
+    ((try? Regex(Identity.anonymousIDPattern).wholeMatch(in: anonymousID) != nil) != nil)
+  }
+
+  private func isExternalID(_ externalID: String?) -> Bool {
+    guard let externalID else { return false }
+    return ((try? Regex(Identity.externalIDPattern).wholeMatch(in: externalID) != nil) != nil)
   }
 }

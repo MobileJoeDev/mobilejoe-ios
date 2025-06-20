@@ -39,7 +39,7 @@ class IdentityManager {
 
 extension IdentityManager {
   private func updateIfNeeded(_ identity: Identity, with externalID: String?) async throws -> Identity {
-    guard externalID != identity.externalID else { return identity }
+    guard Identity.generateExternalID(from: externalID) != identity.externalID else { return identity }
     var editableIdentity = identity
     editableIdentity.update(externalID: externalID)
     try await gateway.save(identity: editableIdentity)
