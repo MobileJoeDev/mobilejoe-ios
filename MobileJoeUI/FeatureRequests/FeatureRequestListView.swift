@@ -94,19 +94,11 @@ extension FeatureRequestListView {
   func Overlay() -> some View {
     if isLoading {
       ProgressView(String(localized: "feature-request.list.loading", bundle: .module))
-    } else if let error {
-      FailureView()
+    } else if error != nil {
+      ContentUnavailableFailureView()
     } else if featureRequests.all.isEmpty {
       NoFeatureRequestsView()
     }
-  }
-
-  private func FailureView() -> some View {
-    ContentUnavailableView(
-      String(localized: "feature-request-list.failure.title", bundle: .module),
-      systemImage: "exclamationmark.triangle",
-      description: Text("feature-request-list.failure.text", bundle: .module)
-    )
   }
 
   private func NoFeatureRequestsView() -> some View {

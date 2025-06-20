@@ -12,10 +12,12 @@ let package = Package(
   products: [
     .library(
       name: "MobileJoe",
-      targets: ["MobileJoe"]),
+      targets: ["MobileJoe"]
+    ),
     .library(
       name: "MobileJoeUI",
-      targets: ["MobileJoeUI"]),
+      targets: ["MobileJoeUI"]
+    ),
   ],
   targets: [
     .target(

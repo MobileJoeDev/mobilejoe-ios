@@ -1,18 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "feature-request-configuration.subject" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New Feature Request"
-          }
-        }
-      }
-    },
-    "feature-request-list.failure.text" : {
+    "content-unavailable.failure.text" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -22,12 +11,23 @@
         }
       }
     },
-    "feature-request-list.failure.title" : {
+    "content-unavailable.failure.title" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sorry!"
+          }
+        }
+      }
+    },
+    "feature-request-configuration.subject" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Feature Request"
           }
         }
       }
