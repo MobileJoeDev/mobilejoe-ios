@@ -31,22 +31,20 @@ public class FeatureRequestsFixture: FeatureRequests {
         title: "Import holidays from calendar",
         body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",
         score: 10,
-        status: "Open",
+        statusIdentifier: "open",
         createdAt: Calendar.utc.date(year: 2025, month: 3, day: 17, hour: 12)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 12)!,
-        isVoted: true,
-        statusHexColor: "#FF0000"
+        isVoted: true
       ),
       FeatureRequest(
         id: 2,
         title: "Cloud Sync",
         body: "Sync records and accounts via iCloud on multiple devices.",
         score: 33,
-        status: "Planned",
+        statusIdentifier: "planned",
         createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 13)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 18, hour: 13)!,
-        isVoted: false,
-        statusHexColor: "#FF0000"
+        isVoted: false
       ),
     ]
     return fr
@@ -72,11 +70,10 @@ extension FeatureRequest {
       As there is already a button to return to the current date, I don’t see much of a reason to change the shown date automatically when switching the app. My suggestion is to remove this “feature” or make it optional.
       """,
       score: 10,
-      status: "Open",
+      statusIdentifier: "open",
       createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 11)!,
       updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 16, hour: 11)!,
-      isVoted: isVoted,
-      statusHexColor: "#FF0000"
+      isVoted: isVoted
     )
   }
 }

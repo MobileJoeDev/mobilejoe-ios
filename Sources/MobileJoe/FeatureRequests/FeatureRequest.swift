@@ -19,19 +19,21 @@ public struct FeatureRequest: Identifiable, Hashable, Codable, Sendable {
   public let title: String
   public let body: String
   public let score: Int
-  public let status: String
+  public let statusIdentifier: String
   public let createdAt: Date
   public let updatedAt: Date
   public let isVoted: Bool
-  public let statusHexColor: String
+
+  public var status: Status {
+    Status(rawValue: statusIdentifier) ?? .open
+  }
 
   private enum CodingKeys: String, CodingKey {
     case id
     case title
     case body
     case score
-    case status
-    case statusHexColor = "status_color"
+    case statusIdentifier = "status_identifier"
     case createdAt = "created_at"
     case updatedAt = "updated_at"
     case isVoted = "voted"

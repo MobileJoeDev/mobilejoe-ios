@@ -13,23 +13,23 @@
 //
 
 import SwiftUI
+import MobileJoe
 
 struct FeatureRequestStatusView: View {
-  let title: String
-  let color: Color
+  let status: FeatureRequest.Status
 
   var body: some View {
-    Text(title)
+    Text(status.title)
       .font(.caption)
       .fontWeight(.medium)
-      .foregroundStyle(color)
+      .foregroundStyle(status.color)
       .padding(.vertical, 2)
       .padding(.horizontal, 6)
-      .background(color.opacity(0.1))
+      .background(status.color.opacity(0.1))
       .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
   }
 }
 
 #Preview {
-  FeatureRequestStatusView(title: "Open", color: .blue)
+  FeatureRequestStatusView(status: .inProgress)
 }

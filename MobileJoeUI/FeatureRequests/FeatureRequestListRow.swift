@@ -36,8 +36,7 @@ struct FeatureRequestListRow: View {
               .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 12) {
-              FeatureRequestStatusView(title: featureRequest.status, color: featureRequest.statusColor)
-
+              FeatureRequestStatusView(status:  featureRequest.status)
               Text(featureRequest.createdAt, style: .date)
                 .foregroundStyle(.secondary)
                 .font(.caption)
