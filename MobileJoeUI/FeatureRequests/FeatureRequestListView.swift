@@ -27,11 +27,7 @@ public struct FeatureRequestListView: View {
     NavigationView {
       List {
         ForEach(featureRequests.all) { featureRequest in
-          NavigationLink {
-            FeatureRequestView(featureRequest: featureRequest)
-          } label: {
-            FeatureRequestListRow(featureRequest: featureRequest) { vote($0) }
-          }
+          FeatureRequestListRow(featureRequest: featureRequest) { vote($0) }
         }
       }
       .refreshable {

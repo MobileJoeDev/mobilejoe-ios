@@ -19,26 +19,41 @@ struct FeatureRequestListRow: View {
   let featureRequest: FeatureRequest
   let vote: (FeatureRequest) -> Void
 
+  @State private var isExtended = false
+
   var body: some View {
-    HStack(alignment: .top, spacing: 6) {
-      VStack(alignment: .leading, spacing: 12) {
-        Text(featureRequest.title)
-          .fontWeight(.medium)
+    Button {
+      isExtended.toggle()
+    } label: {
+      VStack(alignment: .leading, spacing: 16) {
+        HStack(alignment: .top) {
+          VStack(alignment: .leading, spacing: 8) {
+            Text(featureRequest.title)
+              .font(.title3)
+              .fontWeight(.semibold)
+              .multilineTextAlignment(.leading)
+              .lineLimit(nil)
+              .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 12) {
+              FeatureRequestStatusView(title: featureRequest.status, color: featureRequest.statusColor)
+
+              Text(featureRequest.createdAt, style: .date)
+                .foregroundStyle(.secondary)
+                .font(.caption)
+            }
+          }
+
+          Spacer()
+          FeatureRequestVoteButton(featureRequest: featureRequest, vote: vote)
+        }
+
         Text(featureRequest.body)
-          .lineLimit(3)
-          .font(.subheadline)
-
-        FeatureRequestStatusView(
-          title: featureRequest.status.localizedCapitalized,
-          color: featureRequest.statusColor
-        )
-        .padding(.top, 6)
+          .lineLimit(isExtended ? nil : 3)
       }
-
-      Spacer()
-      FeatureRequestVoteButton(featureRequest: featureRequest, vote: vote)
+      .foregroundStyle(Color.primary)
     }
-    .padding(.vertical, 8)
+    .padding(.vertical, 10)
     .frame(maxWidth: .infinity)
   }
 }

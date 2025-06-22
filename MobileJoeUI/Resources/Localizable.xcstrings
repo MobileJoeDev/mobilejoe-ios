@@ -115,16 +115,6 @@
           }
         }
       }
-    },
-    "feature-request.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feature Request"
-          }
-        }
-      }
     }
   },
   "version" : "1.0"
