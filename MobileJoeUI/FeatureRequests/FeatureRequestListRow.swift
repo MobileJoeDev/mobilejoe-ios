@@ -18,13 +18,11 @@ import MobileJoe
 struct FeatureRequestListRow: View {
   let featureRequest: FeatureRequest
   let vote: (FeatureRequest) -> Void
-
-  @State private var isExtended = false
-
+  
+  @State private var isExpanded = false
+  
   var body: some View {
-    Button {
-      isExtended.toggle()
-    } label: {
+    Button(action: toggleExpandedState) {
       VStack(alignment: .leading, spacing: 16) {
         HStack(alignment: .top) {
           VStack(alignment: .leading, spacing: 8) {
@@ -34,7 +32,7 @@ struct FeatureRequestListRow: View {
               .multilineTextAlignment(.leading)
               .lineLimit(nil)
               .fixedSize(horizontal: false, vertical: true)
-
+            
             HStack(spacing: 12) {
               FeatureRequestStatusView(status:  featureRequest.status)
               Text(featureRequest.createdAt, style: .date)
@@ -42,18 +40,24 @@ struct FeatureRequestListRow: View {
                 .font(.caption)
             }
           }
-
+          
           Spacer()
           FeatureRequestVoteButton(featureRequest: featureRequest, vote: vote)
         }
-
+        
         Text(featureRequest.body)
-          .lineLimit(isExtended ? nil : 3)
+          .lineLimit(isExpanded ? nil : 3)
       }
       .foregroundStyle(Color.primary)
     }
     .padding(.vertical, 10)
     .frame(maxWidth: .infinity)
+  }
+}
+
+extension FeatureRequestListRow {
+  private func toggleExpandedState() {
+    isExpanded.toggle()
   }
 }
 

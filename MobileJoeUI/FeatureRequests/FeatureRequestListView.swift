@@ -21,7 +21,7 @@ public struct FeatureRequestListView: View {
 
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
-  @State private var isLoading = false
+  @State private var isLoading = true
 
   public var body: some View {
     NavigationView {
@@ -104,10 +104,9 @@ extension FeatureRequestListView {
 
 extension FeatureRequestListView {
   private func fetchFeatureRequests() async {
+    defer { isLoading = false }
     do {
       resetError()
-      defer { isLoading = false }
-      isLoading = true
       try await featureRequests.load()
     } catch {
       self.error = error
