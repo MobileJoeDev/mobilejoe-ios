@@ -35,16 +35,12 @@ struct Identity: Equatable, Codable {
     self.externalID = Self.generateExternalID(from: externalID)
   }
 
-  var identifiersStringRepresentation: String {
-    ids.joined(separator: ",")
-  }
-
-  private var ids: [String] {
-    var id = [anonymousID]
+  var identifiersRepresentation: [String] {
+    var ids = [anonymousID]
     if let externalID {
-      id.append(externalID)
+      ids.append(externalID)
     }
-    return id
+    return ids
   }
 }
 

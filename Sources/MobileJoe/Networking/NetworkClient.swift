@@ -51,8 +51,7 @@ class NetworkClient {
 extension NetworkClient {
   func getFeatureRequests() async throws -> Data {
     var components = try url(for: "feature_requests")
-    let identifiersQueryItem = try identifiersQueryItem()
-    components.queryItems = [identifiersQueryItem]
+    components.queryItems = try identifiersQueryItems()
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
     return try await perform(urlRequest(for: url, httpMethod: .get))
   }
@@ -69,14 +68,14 @@ extension NetworkClient {
 
 // MARK: - Helper
 extension NetworkClient {
-  private func identifiersBodyValue() throws -> [String: String] {
-    guard let identifiersParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.unknownIdentity }
+  private func identifiersBodyValue() throws -> [String: [String]] {
+    guard let identifiersParameter = identity?.identifiersRepresentation else { throw MobileJoeError.unknownIdentity }
     return ["identifiers": identifiersParameter]
   }
 
-  private func identifiersQueryItem() throws -> URLQueryItem {
-    guard let identifiersQueryParameter = identity?.identifiersStringRepresentation else { throw MobileJoeError.unknownIdentity }
-    return URLQueryItem(name: "identifiers", value: identifiersQueryParameter)
+  private func identifiersQueryItems() throws -> [URLQueryItem] {
+    guard let identifiers = identity?.identifiersRepresentation else { throw MobileJoeError.unknownIdentity }
+    return identifiers.map { URLQueryItem(name: "identifiers[]", value: $0) }
   }
 
   private func perform(_ request: URLRequest) async throws -> Data {
