@@ -146,16 +146,6 @@
         }
       }
     },
-    "feature-request.status.open" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open"
-          }
-        }
-      }
-    },
     "feature-request.status.planned" : {
       "localizations" : {
         "en" : {

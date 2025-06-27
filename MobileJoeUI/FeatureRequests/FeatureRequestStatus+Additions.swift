@@ -16,9 +16,10 @@ import SwiftUI
 import MobileJoe
 
 extension FeatureRequest.Status {
-  var title: String {
+  var title: String? {
     switch self {
-    case .open: String(localized: "feature-request.status.open", bundle: .module)
+    case .unknown: nil
+    case .open: nil
     case .underReview: String(localized: "feature-request.status.under-review", bundle: .module)
     case .planned: String(localized: "feature-request.status.planned", bundle: .module)
     case .inProgress: String(localized: "feature-request.status.in-progress", bundle: .module)
@@ -33,6 +34,7 @@ extension FeatureRequest.Status {
 
   private var hexColor: String {
     switch self {
+    case .unknown: "#6B7280FF" // gray-500
     case .open: "#22C55EFF" // green-500
     case .underReview: "#F59E0BFF" // amber-500
     case .planned: "#3B82F6FF" // blue-500
