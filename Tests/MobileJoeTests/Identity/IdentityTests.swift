@@ -34,13 +34,13 @@ struct IdentityTests {
     let identity = Identity(externalID: "external-id")
 
     let externalID = try #require(identity.externalID)
-    #expect(identity.identifiersStringRepresentation == "\(identity.anonymousID),\(externalID)")
+    #expect(identity.identifiersRepresentation == [identity.anonymousID , externalID])
   }
 
   @Test func stringRepresentation_withoutExternalID() throws {
     let identity = Identity(externalID: nil)
 
-    #expect(identity.identifiersStringRepresentation == identity.anonymousID)
+    #expect(identity.identifiersRepresentation == [identity.anonymousID])
   }
 }
 
