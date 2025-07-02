@@ -17,14 +17,23 @@ import Foundation
 @MainActor
 @Observable
 public class FeatureRequests {
-  public var all: [FeatureRequest] {
-    gateway.all
-      .sorted(by: sorting)
-      .filtered(by: filtering)
+  public var all = [FeatureRequest]()
+
+  public var sorting: FeatureRequest.Sorting = .byNewest {
+    didSet {
+      Task {
+        try? await load()
+      }
+    }
   }
 
-  public var sorting: Sorting = .byNewest
-  public var filtering: Filter = .all
+  public var filtering: Filter = .all {
+    didSet {
+      Task {
+        try? await load()
+      }
+    }
+  }
 
   public var isEmpty: Bool {
     all.isEmpty
@@ -37,51 +46,17 @@ public class FeatureRequests {
   }
 
   public func load() async throws {
-    _ = try await gateway.load(filteredBy: nil)
+    try await gateway.load(filterBy: filtering.toStatus, sort: sorting)
+    all = gateway.all
   }
 
   public func vote(_ featureRequest: FeatureRequest) async throws {
     try await gateway.vote(featureRequest)
+    all = gateway.all
   }
 }
 
-// MARK: - Sorting
-extension FeatureRequests {
-  public enum Sorting: CaseIterable, Identifiable {
-    case byNewest
-    case byScore
-
-    public var id: Self { self }
-  }
-}
-
-fileprivate extension Array where Element == FeatureRequest {
-  func sorted(by sorting: FeatureRequests.Sorting) -> [Element] {
-    switch sorting {
-    case .byNewest: sortByNewest()
-    case .byScore: sortByScore()
-    }
-  }
-
-  private func sortByScore() -> [Element] {
-    sorted { lhs, rhs in
-      if lhs.score == rhs.score {
-        return lhs.id < rhs.id
-      }
-      return lhs.score > rhs.score
-    }
-  }
-
-  private func sortByNewest() -> [Element] {
-    sorted { lhs, rhs in
-      if lhs.createdAt == rhs.createdAt {
-        return lhs.id < rhs.id
-      }
-      return lhs.createdAt > rhs.createdAt
-    }
-  }
-}
-
+// MARK: - Filtering
 extension FeatureRequests {
   public enum Filter: CaseIterable, Identifiable {
     case all
@@ -92,21 +67,14 @@ extension FeatureRequests {
 
     public var id: Self { self }
 
-    var toStatus: FeatureRequest.Status? {
+    var toStatus: [FeatureRequest.Status] {
       switch self {
-      case .all: nil
-      case .underReview: .underReview
-      case .planned: .planned
-      case .inProgress: .inProgress
-      case .completed: .completed
+      case .all: [.open, .underReview, .planned, .inProgress, .completed]
+      case .underReview: [.underReview]
+      case .planned: [.planned]
+      case .inProgress: [.inProgress]
+      case .completed: [.completed]
       }
     }
-  }
-}
-
-fileprivate extension Array where Element == FeatureRequest {
-  func filtered(by filter: FeatureRequests.Filter) -> [Element] {
-    guard let status = filter.toStatus else { return self }
-    return self.filter { $0.status == status }
   }
 }

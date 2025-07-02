@@ -31,6 +31,7 @@ struct FeatureRequestVoteButton: View {
           .minimumScaleFactor(0.5)
       }
       .foregroundStyle(foregroundColor)
+      .aspectRatio(1.0, contentMode: .fill)
       .frame(maxWidth: 32)
       .padding(8)
       .background(
@@ -59,9 +60,7 @@ extension FeatureRequestVoteButton {
 
 
 #Preview("Voted") {
-  FeatureRequestVoteButton(featureRequest: .fixture(isVoted: true), vote: { _ in })
-}
-
-#Preview("Not Voted") {
+  FeatureRequestVoteButton(featureRequest: .fixture(isVoted: true, score: 10_320), vote: { _ in })
+  FeatureRequestVoteButton(featureRequest: .fixture(isVoted: false, score: 10_320), vote: { _ in })
   FeatureRequestVoteButton(featureRequest: .fixture(isVoted: false), vote: { _ in })
 }

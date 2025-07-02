@@ -7,7 +7,7 @@
 //
 //      https://opensource.org/licenses/MIT
 //
-//  FeatureRequestsFixture.swift
+//  MobileJoe+Fixtures.swift
 //
 //  Created by Florian Mielke on 20.03.25.
 //
@@ -25,30 +25,35 @@ public class FeatureRequestsFixture: FeatureRequests {
 
   public static var all: FeatureRequestsFixture {
     let fr = FeatureRequestsFixture()
-//    fr.all = [
-//      FeatureRequest(
-//        id: 1,
-//        title: "Import holidays from calendar",
-//        body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",
-//        score: 10,
-//        statusIdentifier: "open",
-//        createdAt: Calendar.utc.date(year: 2025, month: 3, day: 17, hour: 12)!,
-//        updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 12)!,
-//        isVoted: true
-//      ),
-//      FeatureRequest(
-//        id: 2,
-//        title: "Cloud Sync",
-//        body: "Sync records and accounts via iCloud on multiple devices.",
-//        score: 33,
-//        statusIdentifier: "planned",
-//        createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 13)!,
-//        updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 18, hour: 13)!,
-//        isVoted: false
-//      ),
-//    ]
+    fr.allReturnValue = [
+      FeatureRequest(
+        id: 1,
+        title: "Import holidays from calendar",
+        body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",
+        score: 10,
+        statusIdentifier: FeatureRequest.Status.open.rawValue,
+        createdAt: Calendar.utc.date(year: 2025, month: 3, day: 17, hour: 12)!,
+        updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 12)!,
+        isVoted: true
+      ),
+      FeatureRequest(
+        id: 2,
+        title: "Cloud Sync",
+        body: "Sync records and accounts via iCloud on multiple devices.",
+        score: 33,
+        statusIdentifier: FeatureRequest.Status.planned.rawValue,
+        createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 13)!,
+        updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 18, hour: 13)!,
+        isVoted: false
+      ),
+    ]
     return fr
   }
+
+  private var allReturnValue = [FeatureRequest]()
+//  public override var all: [FeatureRequest] {
+//    allReturnValue
+//  }
 
   private var loadError: Error? = nil
   public override func load() async throws {
@@ -60,7 +65,7 @@ public class FeatureRequestsFixture: FeatureRequests {
 }
 
 extension FeatureRequest {
-  public static func fixture(isVoted: Bool) -> FeatureRequest {
+  public static func fixture(isVoted: Bool, score: Int = 10) -> FeatureRequest {
     FeatureRequest(
       id: 1,
       title: "Do not change the view date when changing the app",
@@ -69,7 +74,7 @@ extension FeatureRequest {
       
       As there is already a button to return to the current date, I don’t see much of a reason to change the shown date automatically when switching the app. My suggestion is to remove this “feature” or make it optional.
       """,
-      score: 10,
+      score: score,
       statusIdentifier: Status.inProgress.rawValue,
       createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 11)!,
       updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 16, hour: 11)!,

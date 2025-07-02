@@ -49,9 +49,10 @@ class NetworkClient {
 
 // MARK: - FeatureRequests
 extension NetworkClient {
-  func getFeatureRequests(filteredBy status: FeatureRequest.Status? = nil) async throws -> Data {
+  func getFeatureRequests(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting) async throws -> Data {
     var components = try url(for: "feature_requests")
-    components.queryItems = try identifiersQueryItems()
+    let identifiersQueryItems = try identifiersQueryItems()
+    components.queryItems = identifiersQueryItems + statusesQueryItems(for: statuses)
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
     return try await perform(urlRequest(for: url, httpMethod: .get))
   }
@@ -63,6 +64,10 @@ extension NetworkClient {
     var request = urlRequest(for: url, httpMethod: .post)
     request.httpBody = try JSONEncoder().encode(identifiersBodyValue)
     return try await perform(request)
+  }
+
+  private func statusesQueryItems(for statuses: [FeatureRequest.Status]?) -> [URLQueryItem] {
+    statuses?.map { URLQueryItem(name: "statuses[]", value: $0.rawValue) } ?? []
   }
 }
 

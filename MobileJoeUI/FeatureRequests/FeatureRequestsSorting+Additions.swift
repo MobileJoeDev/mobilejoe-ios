@@ -7,7 +7,7 @@
 //
 //      https://opensource.org/licenses/MIT
 //
-//  FeatureRequestSorting+Additions.swift
+//  FeatureRequestsSorting+Additions.swift
 //
 //  Created by Florian Mielke on 08.05.25.
 //
@@ -15,7 +15,7 @@
 import Foundation
 import MobileJoe
 
-extension FeatureRequests.Sorting {
+extension FeatureRequest.Sorting {
   var title: String {
     switch self {
     case .byNewest: String(localized: "feature-request.list.sorting.by-newest", bundle: .module)

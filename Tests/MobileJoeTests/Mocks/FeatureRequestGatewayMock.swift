@@ -16,16 +16,18 @@ import Foundation
 @testable import MobileJoe
 
 class FeatureRequestGatewayMock: FeatureRequestGateway {
-  var allReturnValue: [FeatureRequest]?
+  private var container = [FeatureRequest]()
+
+  var allReturnValue: [FeatureRequest] = []
   var all: [FeatureRequest] {
-    allReturnValue ?? []
+    container
   }
 
-  func load(filteredBy status: FeatureRequest.Status?) async throws -> [FeatureRequest] {
-    all
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws {
+    container = allReturnValue
       .filter { fr in
-        guard let status else { return true }
-        return fr.status == status
+        guard let statuses else { return true }
+        return statuses.contains(fr.status)
       }
   }
 

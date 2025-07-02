@@ -61,7 +61,7 @@ extension FeatureRequestListView {
     ToolbarItem(placement: .topBarLeading) {
       Menu {
         Picker(String(localized: "feature-request.list.sorting", bundle: .module), selection: $featureRequests.sorting) {
-          ForEach(FeatureRequests.Sorting.allCases) { sorting in
+          ForEach(FeatureRequest.Sorting.allCases) { sorting in
             Label(sorting.title, systemImage: sorting.systemImage)
           }
         }

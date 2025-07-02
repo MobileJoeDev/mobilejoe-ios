@@ -17,7 +17,7 @@ import Foundation
 @MainActor
 public protocol FeatureRequestGateway {
   var all: [FeatureRequest] { get }
-  func load(filteredBy status: FeatureRequest.Status?) async throws -> [FeatureRequest]
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
@@ -25,31 +25,30 @@ public protocol FeatureRequestGateway {
 class RemoteFeatureRequestGateway: FeatureRequestGateway {
   static var shared = RemoteFeatureRequestGateway()
 
-  private var container: Set<FeatureRequest>
+  private var cache: Set<FeatureRequest>
   private let parser: FeatureRequestParser
   private let client: NetworkClient
 
   init() {
     self.parser = FeatureRequestParser()
     self.client = NetworkClient.shared
-    self.container = []
+    self.cache = []
   }
 
   var all: [FeatureRequest] {
-    Array(container)
+    Array(cache)
   }
 
-  func load(filteredBy status: FeatureRequest.Status?) async throws -> [FeatureRequest] {
-    let response = try await client.getFeatureRequests(filteredBy: status)
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting) async throws {
+    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting)
     let result: [FeatureRequest] = try parser.parse(response)
-    container = Set(result)
-    return result
+    cache = Set(result)
   }
 
   func vote(_ featureRequest: FeatureRequest) async throws {
     let response = try await client.postVoteFeatureRequests(featureRequestID: featureRequest.id)
     let result: FeatureRequest = try parser.parse(response)
-    container.remove(result)
-    container.insert(result)
+    cache.remove(result)
+    cache.insert(result)
   }
 }
