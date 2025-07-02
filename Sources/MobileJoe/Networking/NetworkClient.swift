@@ -49,7 +49,7 @@ class NetworkClient {
 
 // MARK: - FeatureRequests
 extension NetworkClient {
-  func getFeatureRequests() async throws -> Data {
+  func getFeatureRequests(filteredBy status: FeatureRequest.Status? = nil) async throws -> Data {
     var components = try url(for: "feature_requests")
     components.queryItems = try identifiersQueryItems()
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }

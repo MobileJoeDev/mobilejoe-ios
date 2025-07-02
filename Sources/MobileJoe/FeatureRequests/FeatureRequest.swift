@@ -25,7 +25,7 @@ public struct FeatureRequest: Identifiable, Hashable, Codable, Sendable {
   public let isVoted: Bool
 
   public var status: Status {
-    Status(rawValue: statusIdentifier) ?? .open
+    Status(rawValue: statusIdentifier) ?? .unknown
   }
 
   private enum CodingKeys: String, CodingKey {

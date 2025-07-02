@@ -16,8 +16,8 @@ import Foundation
 
 @MainActor
 public protocol FeatureRequestGateway {
-  func all() async throws -> [FeatureRequest]
-  func load() async throws -> [FeatureRequest]
+  var all: [FeatureRequest] { get }
+  func load(filteredBy status: FeatureRequest.Status?) async throws -> [FeatureRequest]
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
@@ -35,12 +35,12 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
     self.container = []
   }
 
-  func all() async throws -> [FeatureRequest] {
+  var all: [FeatureRequest] {
     Array(container)
   }
 
-  func load() async throws -> [FeatureRequest] {
-    let response = try await client.getFeatureRequests()
+  func load(filteredBy status: FeatureRequest.Status?) async throws -> [FeatureRequest] {
+    let response = try await client.getFeatureRequests(filteredBy: status)
     let result: [FeatureRequest] = try parser.parse(response)
     container = Set(result)
     return result

@@ -65,6 +65,12 @@ extension FeatureRequestListView {
             Label(sorting.title, systemImage: sorting.systemImage)
           }
         }
+
+        Picker(String(localized: "feature-request.list.filtering", bundle: .module), selection: $featureRequests.filtering) {
+          ForEach(FeatureRequests.Filter.allCases) { filter in
+            Text(filter.title)
+          }
+        }
       } label: {
         Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: "line.3.horizontal.decrease.circle")
       }
