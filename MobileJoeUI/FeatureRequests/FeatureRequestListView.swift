@@ -58,41 +58,40 @@ public struct FeatureRequestListView: View {
 extension FeatureRequestListView {
   @ToolbarContentBuilder
   private func ToolbarItems() -> some ToolbarContent {
-    ToolbarItem(placement: .topBarLeading) {
-      Menu {
-        Picker(String(localized: "feature-request.list.sorting", bundle: .module), selection: $featureRequests.sorting) {
-          ForEach(FeatureRequest.Sorting.allCases) { sorting in
-            Label(sorting.title, systemImage: sorting.systemImage)
-          }
-        }
-
-        Picker(String(localized: "feature-request.list.filtering", bundle: .module), selection: $featureRequests.filtering) {
-          ForEach(FeatureRequests.Filter.allCases) { filter in
-            Text(filter.title)
-          }
-        }
-      } label: {
-        Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: "line.3.horizontal.decrease.circle")
-      }
-    }
-
     ToolbarItem(placement: .topBarTrailing) {
       CloseButtonToolbarItem {
         dismiss()
       }
     }
 
-    if let mailToURL = configuration.mailToURL {
-      ToolbarItemGroup(placement: .bottomBar) {
-        Spacer()
+    ToolbarItemGroup(placement: .bottomBar) {
+      ActionMenu()
+
+      Spacer()
+
+      if let mailToURL = configuration.mailToURL {
         Link(destination: mailToURL) {
-          Text("feature-request.list.new-feature-request", bundle: .module)
-            .font(.footnote)
-            .fontWeight(.medium)
+          Image(systemName: "square.and.pencil")
         }
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.capsule)
       }
+    }
+  }
+
+  private func ActionMenu() -> some View {
+    Menu {
+      Picker(String(localized: "feature-request.list.sorting", bundle: .module), selection: $featureRequests.sorting) {
+        ForEach(FeatureRequest.Sorting.allCases) { sorting in
+          Label(sorting.title, systemImage: sorting.systemImage)
+        }
+      }
+
+      Picker(String(localized: "feature-request.list.filtering", bundle: .module), selection: $featureRequests.filtering) {
+        ForEach(FeatureRequests.Filter.allCases) { filter in
+          Text(filter.title)
+        }
+      }
+    } label: {
+      Label(String(localized: "feature-request.list.sorting", bundle: .module), systemImage: actionMenuSystemImage)
     }
   }
 
@@ -104,6 +103,14 @@ extension FeatureRequestListView {
       JoeContentUnavailableFailureView()
     } else if featureRequests.all.isEmpty {
       JoeContentUnavailableView(title: "feature-request-list.no-items.title", text: "feature-request-list.no-items.text")
+    }
+  }
+
+  private var actionMenuSystemImage: String {
+    if featureRequests.filtering == .all {
+      return "line.3.horizontal.decrease.circle"
+    } else {
+      return "line.3.horizontal.decrease.circle.fill"
     }
   }
 }

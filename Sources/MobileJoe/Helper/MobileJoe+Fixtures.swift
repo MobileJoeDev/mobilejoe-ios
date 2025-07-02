@@ -25,7 +25,7 @@ public class FeatureRequestsFixture: FeatureRequests {
 
   public static var all: FeatureRequestsFixture {
     let fr = FeatureRequestsFixture()
-    fr.allReturnValue = [
+    fr.container = [
       FeatureRequest(
         id: 1,
         title: "Import holidays from calendar",
@@ -50,14 +50,16 @@ public class FeatureRequestsFixture: FeatureRequests {
     return fr
   }
 
-  private var allReturnValue = [FeatureRequest]()
-//  public override var all: [FeatureRequest] {
-//    allReturnValue
-//  }
+  var container = [FeatureRequest]() {
+    didSet {
+      all = container
+    }
+  }
 
   private var loadError: Error? = nil
   public override func load() async throws {
     if let loadError { throw loadError }
+    all = container.filter { filtering.toStatus.contains($0.status) }
   }
 
   public override func vote(_ featureRequest: FeatureRequest) async throws {
