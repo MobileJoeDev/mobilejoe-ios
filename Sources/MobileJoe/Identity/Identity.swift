@@ -34,14 +34,6 @@ struct Identity: Equatable, Codable {
   mutating func update(externalID: String?) {
     self.externalID = Self.generateExternalID(from: externalID)
   }
-
-  var identifiersRepresentation: [String] {
-    var ids = [anonymousID]
-    if let externalID {
-      ids.append(externalID)
-    }
-    return ids
-  }
 }
 
 extension Identity {

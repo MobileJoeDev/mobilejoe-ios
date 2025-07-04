@@ -29,19 +29,6 @@ struct IdentityTests {
     #expect(identity.externalID == nil)
     #expect(isAnonymousID(identity.anonymousID))
   }
-
-  @Test func stringRepresentation_withExternalID() throws {
-    let identity = Identity(externalID: "external-id")
-
-    let externalID = try #require(identity.externalID)
-    #expect(identity.identifiersRepresentation == [identity.anonymousID , externalID])
-  }
-
-  @Test func stringRepresentation_withoutExternalID() throws {
-    let identity = Identity(externalID: nil)
-
-    #expect(identity.identifiersRepresentation == [identity.anonymousID])
-  }
 }
 
 extension IdentityTests {
