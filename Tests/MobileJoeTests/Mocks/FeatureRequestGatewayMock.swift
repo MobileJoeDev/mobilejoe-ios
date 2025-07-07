@@ -19,7 +19,7 @@ class FeatureRequestGatewayMock: FeatureRequestGateway {
   private var container = [FeatureRequest]()
 
   var allReturnValue: [FeatureRequest] = []
-  var all: [FeatureRequest] {
+  var featureRequests: [FeatureRequest] {
     container
   }
 

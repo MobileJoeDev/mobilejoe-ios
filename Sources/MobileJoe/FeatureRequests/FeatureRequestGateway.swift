@@ -16,7 +16,7 @@ import Foundation
 
 @MainActor
 public protocol FeatureRequestGateway {
-  var all: [FeatureRequest] { get }
+  var featureRequests: [FeatureRequest] { get }
   func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
   func vote(_ featureRequest: FeatureRequest) async throws
 }
@@ -25,30 +25,34 @@ public protocol FeatureRequestGateway {
 class RemoteFeatureRequestGateway: FeatureRequestGateway {
   static var shared = RemoteFeatureRequestGateway()
 
-  private var cache: Set<FeatureRequest>
   private let parser: FeatureRequestParser
   private let client: NetworkClient
 
   init() {
     self.parser = FeatureRequestParser()
     self.client = NetworkClient.shared
-    self.cache = []
   }
 
-  var all: [FeatureRequest] {
-    Array(cache)
-  }
+  var featureRequests = [FeatureRequest]()
 
   func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting) async throws {
     let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting)
     let result: [FeatureRequest] = try parser.parse(response)
-    cache = Set(result)
+    featureRequests = result
   }
 
   func vote(_ featureRequest: FeatureRequest) async throws {
     let response = try await client.postVoteFeatureRequests(featureRequestID: featureRequest.id)
-    let result: FeatureRequest = try parser.parse(response)
-    cache.remove(result)
-    cache.insert(result)
+    let votedFeatureRequest: FeatureRequest = try parser.parse(response)
+
+    guard let index = featureRequests.firstIndex(of: featureRequest) else { throw Error.unknownFeatureRequest }
+    featureRequests.remove(at: index)
+    featureRequests.insert(votedFeatureRequest, at: index)
+  }
+}
+
+extension RemoteFeatureRequestGateway {
+  enum Error: Swift.Error {
+    case unknownFeatureRequest
   }
 }

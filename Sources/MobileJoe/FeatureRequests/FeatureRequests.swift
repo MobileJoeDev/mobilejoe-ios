@@ -47,12 +47,12 @@ public class FeatureRequests {
 
   public func load() async throws {
     try await gateway.load(filterBy: filtering.toStatus, sort: sorting)
-    all = gateway.all
+    all = gateway.featureRequests
   }
 
   public func vote(_ featureRequest: FeatureRequest) async throws {
     try await gateway.vote(featureRequest)
-    all = gateway.all
+    all = gateway.featureRequests
   }
 }
 

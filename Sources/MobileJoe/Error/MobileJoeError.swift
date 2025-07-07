@@ -17,6 +17,7 @@ import Foundation
 enum MobileJoeError: Error {
   case notConfigured
   case unknownIdentity
+  case unknownFeatureRequest
   case invalidURL(components: URLComponents)
   case notOkURLResponse(description: String)
   case generic(String)
