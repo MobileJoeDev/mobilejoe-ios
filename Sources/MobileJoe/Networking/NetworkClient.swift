@@ -92,9 +92,9 @@ extension NetworkClient {
     request.setValue(SystemInfo.appVersion, forHTTPHeaderField: "X-Client-Version")
     request.setValue(SystemInfo.buildVersion, forHTTPHeaderField: "X-Client-Build-Version")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-    request.setValue(identity.anonymousID, forHTTPHeaderField: "X-Anonymous-Identifier")
+    request.setValue(identity.anonymousID, forHTTPHeaderField: "Identity-Anonymous-ID")
     if let externalID = identity.externalID {
-      request.setValue(externalID, forHTTPHeaderField: "X-External-Identifier")
+      request.setValue(externalID, forHTTPHeaderField: "Identity-External-ID")
     }
     return request
   }
