@@ -64,6 +64,6 @@ extension FeatureRequestListRow {
 #Preview("Voted") {
   List {
     FeatureRequestListRow(featureRequest: .fixture(isVoted: true), vote: { _ in })
-    FeatureRequestListRow(featureRequest: .fixture(isVoted: false), vote: { _ in })
+    FeatureRequestListRow(featureRequest: .fixture(isVoted: false, score: 1_030), vote: { _ in })
   }
 }

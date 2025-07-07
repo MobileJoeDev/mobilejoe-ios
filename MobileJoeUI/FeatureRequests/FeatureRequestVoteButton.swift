@@ -26,7 +26,7 @@ struct FeatureRequestVoteButton: View {
       VStack(spacing: 4) {
         Image(systemName: "chevron.up")
           .font(.caption)
-        Text(verbatim: "\(featureRequest.score)")
+        Text(featureRequest.score, format: .number.notation(.compactName))
           .lineLimit(1)
           .minimumScaleFactor(0.5)
       }
