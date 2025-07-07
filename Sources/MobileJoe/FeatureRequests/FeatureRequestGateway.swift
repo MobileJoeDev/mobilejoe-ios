@@ -17,7 +17,7 @@ import Foundation
 @MainActor
 public protocol FeatureRequestGateway {
   var featureRequests: [FeatureRequest] { get }
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, reset: Bool) async throws
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
@@ -27,16 +27,23 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
 
   private let parser: FeatureRequestParser
   private let client: NetworkClient
+  private var page: Int
 
   init() {
     self.parser = FeatureRequestParser()
     self.client = NetworkClient.shared
+    self.page = 0
   }
 
   var featureRequests = [FeatureRequest]()
 
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting) async throws {
-    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting)
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, reset: Bool) async throws {
+    if reset {
+      page = 1
+    } else {
+      page += 1
+    }
+    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, page: page)
     let result: [FeatureRequest] = try parser.parse(response)
     featureRequests = result
   }

@@ -46,13 +46,24 @@ public class FeatureRequests {
   }
 
   public func load() async throws {
-    try await gateway.load(filterBy: filtering.toStatus, sort: sorting)
+    try await gateway.load(filterBy: filtering.toStatus, sort: sorting, reset: true)
     all = gateway.featureRequests
   }
 
   public func vote(_ featureRequest: FeatureRequest) async throws {
     try await gateway.vote(featureRequest)
     all = gateway.featureRequests
+  }
+}
+
+extension FeatureRequests: AsyncSequence, AsyncIteratorProtocol {
+  public func next() async throws -> [FeatureRequest]? {
+    try await gateway.load(filterBy: filtering.toStatus, sort: sorting, reset: false)
+    return gateway.featureRequests
+  }
+
+  nonisolated public func makeAsyncIterator() -> FeatureRequests {
+    self
   }
 }
 
