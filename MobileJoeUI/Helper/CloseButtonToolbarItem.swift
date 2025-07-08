@@ -18,7 +18,7 @@ struct CloseButtonToolbarItem: View {
   let close: () -> Void
 
   var body: some View {
-    Button(action: close) {
+    Button(role: .cancel, action: close) {
       Image(systemName: "xmark.circle.fill")
         .symbolRenderingMode(.hierarchical)
         .foregroundStyle(Color.secondary)

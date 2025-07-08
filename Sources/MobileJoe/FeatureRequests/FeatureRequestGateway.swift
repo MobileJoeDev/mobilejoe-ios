@@ -17,7 +17,8 @@ import Foundation
 @MainActor
 public protocol FeatureRequestGateway {
   var featureRequests: [FeatureRequest] { get }
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, reset: Bool) async throws
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
@@ -27,34 +28,34 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
 
   private let parser: FeatureRequestParser
   private let client: NetworkClient
-  private var page: Int
+  private var pagination: Pagination
 
   init() {
     self.parser = FeatureRequestParser()
     self.client = NetworkClient.shared
-    self.page = 0
+    self.pagination = Pagination()
   }
 
   var featureRequests = [FeatureRequest]()
 
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, reset: Bool) async throws {
-    if reset {
-      page = 1
-    } else {
-      page += 1
-    }
-    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, page: page)
-    let result: [FeatureRequest] = try parser.parse(response)
-    featureRequests = result
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws {
+    pagination = Pagination()
+    featureRequests.removeAll()
+    try await load(filterBy: statuses, sort: sort)
+  }
+
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting) async throws {
+    guard let nextPage = pagination.nextPage else { return }
+    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, page: nextPage)
+    pagination = response.pagination
+    let result: [FeatureRequest] = try parser.parse(response.data)
+    featureRequests.append(contentsOf: result)
   }
 
   func vote(_ featureRequest: FeatureRequest) async throws {
     let response = try await client.postVoteFeatureRequests(featureRequestID: featureRequest.id)
     let votedFeatureRequest: FeatureRequest = try parser.parse(response)
-
-    guard let index = featureRequests.firstIndex(of: featureRequest) else { throw Error.unknownFeatureRequest }
-    featureRequests.remove(at: index)
-    featureRequests.insert(votedFeatureRequest, at: index)
+    try featureRequests.replace(featureRequest, with: votedFeatureRequest)
   }
 }
 

@@ -19,6 +19,7 @@ enum MobileJoeError: Error {
   case unknownIdentity
   case unknownFeatureRequest
   case invalidURL(components: URLComponents)
+  case invalidHTTPResponse
   case notOkURLResponse(description: String)
   case generic(String)
 }

@@ -28,10 +28,13 @@ public struct FeatureRequestListView: View {
       List {
         ForEach(featureRequests.all) { featureRequest in
           FeatureRequestListRow(featureRequest: featureRequest) { vote($0) }
+            .onAppear {
+              loadMoreIfNeeded(featureRequest)
+            }
         }
       }
       .refreshable {
-        await fetchFeatureRequests()
+        await reload()
       }
       .overlay {
         Overlay()
@@ -41,7 +44,7 @@ public struct FeatureRequestListView: View {
       .toolbar(content: ToolbarItems)
     }
     .task {
-      await fetchFeatureRequests()
+      await load()
     }
   }
 
@@ -116,11 +119,28 @@ extension FeatureRequestListView {
 }
 
 extension FeatureRequestListView {
-  private func fetchFeatureRequests() async {
+  private func loadMoreIfNeeded(_ featureRequest: FeatureRequest) {
+    guard featureRequest == featureRequests.all.last else { return }
+    Task {
+      await load()
+    }
+  }
+
+  private func load() async {
     defer { isLoading = false }
     do {
       resetError()
       try await featureRequests.load()
+    } catch {
+      self.error = error
+    }
+  }
+
+  private func reload() async {
+    defer { isLoading = false }
+    do {
+      resetError()
+      try await featureRequests.reload()
     } catch {
       self.error = error
     }

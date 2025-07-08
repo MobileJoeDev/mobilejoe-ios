@@ -31,6 +31,14 @@ class FeatureRequestGatewayMock: FeatureRequestGateway {
       }
   }
 
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws {
+    container = allReturnValue
+      .filter { fr in
+        guard let statuses else { return true }
+        return statuses.contains(fr.status)
+      }
+  }
+
   func vote(_ featureRequest: FeatureRequest) async throws {
 
   }

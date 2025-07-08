@@ -49,19 +49,22 @@ class NetworkClient {
 
 // MARK: - FeatureRequests
 extension NetworkClient {
-  func getFeatureRequests(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, page: Int) async throws -> Data {
+  func getFeatureRequests(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, page: Int) async throws -> (data: Data, pagination: Pagination) {
     var components = try url(for: "feature_requests")
     components.queryItems = statusesQueryItems(for: statuses) + sortQueryItems(for: sorting) + pageQueryItems(for: page)
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
     let request = try urlRequest(for: url, httpMethod: .get)
-    return try await perform(request)
+    let result = try await perform(request)
+    let pagination = Pagination(urlResponse: result.response)
+    logger.debug("Pagination: \(pagination.currentPage) vs \(pagination.totalPages)")
+    return (result.data, pagination)
   }
 
   func postVoteFeatureRequests(featureRequestID: Int) async throws -> Data {
     let components = try url(for: "feature_requests/\(featureRequestID)/vote")
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
     let request = try urlRequest(for: url, httpMethod: .post)
-    return try await perform(request)
+    return try await perform(request).data
   }
 
   private func statusesQueryItems(for statuses: [FeatureRequest.Status]?) -> [URLQueryItem] {
@@ -73,16 +76,15 @@ extension NetworkClient {
   }
 
   private func pageQueryItems(for page: Int) -> [URLQueryItem] {
-    [URLQueryItem(name: "page", value: "\(page)"), URLQueryItem(name: "limit", value: "1")]
+    [URLQueryItem(name: "page", value: "\(page)"), URLQueryItem(name: "limit", value: "5")]
   }
 }
 
 // MARK: - Helper
 extension NetworkClient {
-  private func perform(_ request: URLRequest) async throws -> Data {
+  private func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse) {
     guard NetworkClient.isConfigured else { throw MobileJoeError.notConfigured }
-    let response = try await router.perform(request)
-    return response.0
+    return try await router.perform(request)
   }
 
   private func urlRequest(for url: URL, httpMethod: HTTPMethod) throws -> URLRequest {

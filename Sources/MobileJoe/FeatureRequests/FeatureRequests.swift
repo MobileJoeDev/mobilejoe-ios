@@ -22,7 +22,7 @@ public class FeatureRequests {
   public var sorting: FeatureRequest.Sorting = .byNewest {
     didSet {
       Task {
-        try? await load()
+        try? await reload()
       }
     }
   }
@@ -30,7 +30,7 @@ public class FeatureRequests {
   public var filtering: Filter = .all {
     didSet {
       Task {
-        try? await load()
+        try? await reload()
       }
     }
   }
@@ -46,24 +46,18 @@ public class FeatureRequests {
   }
 
   public func load() async throws {
-    try await gateway.load(filterBy: filtering.toStatus, sort: sorting, reset: true)
+    try await gateway.load(filterBy: filtering.toStatus, sort: sorting)
+    all = gateway.featureRequests
+  }
+
+  public func reload() async throws {
+    try await gateway.reload(filterBy: filtering.toStatus, sort: sorting)
     all = gateway.featureRequests
   }
 
   public func vote(_ featureRequest: FeatureRequest) async throws {
     try await gateway.vote(featureRequest)
     all = gateway.featureRequests
-  }
-}
-
-extension FeatureRequests: AsyncSequence, AsyncIteratorProtocol {
-  public func next() async throws -> [FeatureRequest]? {
-    try await gateway.load(filterBy: filtering.toStatus, sort: sorting, reset: false)
-    return gateway.featureRequests
-  }
-
-  nonisolated public func makeAsyncIterator() -> FeatureRequests {
-    self
   }
 }
 

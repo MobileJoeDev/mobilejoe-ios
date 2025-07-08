@@ -25,7 +25,7 @@ struct FeatureRequestListRow: View {
     Button(action: toggleExpandedState) {
       VStack(alignment: .leading, spacing: 16) {
         HStack(alignment: .top) {
-          VStack(alignment: .leading, spacing: 8) {
+          VStack(alignment: .leading, spacing: 6) {
             Text(featureRequest.title)
               .font(.title3)
               .fontWeight(.semibold)
