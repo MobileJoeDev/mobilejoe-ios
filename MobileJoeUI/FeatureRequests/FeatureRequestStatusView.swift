@@ -22,7 +22,7 @@ struct FeatureRequestStatusView: View {
     if let title = status.title {
       Text(title)
         .font(.caption)
-        .fontWeight(.medium)
+        .fontWeight(.semibold)
         .foregroundStyle(status.color)
         .padding(.vertical, 2)
         .padding(.horizontal, 6)

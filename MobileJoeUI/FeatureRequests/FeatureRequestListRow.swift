@@ -27,8 +27,7 @@ struct FeatureRequestListRow: View {
         HStack(alignment: .top) {
           VStack(alignment: .leading, spacing: 6) {
             Text(featureRequest.title)
-              .font(.title3)
-              .fontWeight(.semibold)
+              .font(.headline)
               .multilineTextAlignment(.leading)
               .lineLimit(nil)
               .fixedSize(horizontal: false, vertical: true)

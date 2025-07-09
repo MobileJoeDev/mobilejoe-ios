@@ -44,7 +44,7 @@ public struct FeatureRequestListView: View {
       .toolbar(content: ToolbarItems)
     }
     .task {
-      await load()
+      await reload()
     }
   }
 
