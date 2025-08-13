@@ -74,7 +74,7 @@ extension FeatureRequests {
 
     var toStatus: [FeatureRequest.Status] {
       switch self {
-      case .all: [.open, .underReview, .planned, .inProgress, .completed]
+      case .all: [.open, .underReview, .planned, .inProgress]
       case .underReview: [.underReview]
       case .planned: [.planned]
       case .inProgress: [.inProgress]
