@@ -33,11 +33,11 @@ struct IdentityTests {
 
 extension IdentityTests {
   private func isAnonymousID(_ anonymousID: String) -> Bool {
-    ((try? Regex(Identity.anonymousIDPattern).wholeMatch(in: anonymousID) != nil) != nil)
+    (try? Regex(Identity.anonymousIDPattern).wholeMatch(in: anonymousID)) != nil
   }
 
   private func isExternalID(_ externalID: String?) -> Bool {
     guard let externalID else { return false }
-    return ((try? Regex(Identity.externalIDPattern).wholeMatch(in: externalID) != nil) != nil)
+    return (try? Regex(Identity.externalIDPattern).wholeMatch(in: externalID)) != nil
   }
 }
