@@ -15,7 +15,7 @@
 import Foundation
 
 extension FeatureRequest {
-  public enum Status: String {
+  public enum Status: String, Sendable {
     case unknown = "unknown"
     case open = "open"
     case underReview = "under_review"

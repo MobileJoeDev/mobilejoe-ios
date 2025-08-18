@@ -14,12 +14,11 @@
 
 import Foundation
 
-@MainActor
-protocol Router {
+protocol Router: Sendable {
   func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse)
 }
 
-class DefaultRouter: Router {
+final class DefaultRouter: Router, @unchecked Sendable {
   func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse) {
     let (data, urlResponse) = try await URLSession.shared.data(for: request)
     guard urlResponse.isOK else { throw MobileJoeError.notOkURLResponse(description: urlResponse.description) }

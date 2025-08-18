@@ -15,7 +15,7 @@
 import Foundation
 @testable import MobileJoe
 
-class FeatureRequestGatewayMock: FeatureRequestGateway {
+class FeatureRequestGatewayMock: FeatureRequestGateway, @unchecked Sendable {
   private var container = [FeatureRequest]()
 
   var allReturnValue: [FeatureRequest] = []
