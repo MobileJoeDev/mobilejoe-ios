@@ -17,8 +17,8 @@ import Foundation
 @MainActor
 public protocol FeatureRequestGateway {
   var featureRequests: [FeatureRequest] { get }
-  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
@@ -38,17 +38,20 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
 
   var featureRequests = [FeatureRequest]()
 
-  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws {
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws {
+    print("Reload: \(search ?? "")")
     pagination = Pagination()
     featureRequests.removeAll()
-    try await load(filterBy: statuses, sort: sort)
+    try await load(filterBy: statuses, sort: sort, search: search)
   }
 
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting) async throws {
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?) async throws {
+    print("Search: \(search ?? "")")
     guard let nextPage = pagination.nextPage else { return }
-    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, page: nextPage)
+    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, search: search, page: nextPage)
     pagination = response.pagination
     let result: [FeatureRequest] = try parser.parse(response.data)
+    print("RESULT: \(result.map { $0.title })")
     featureRequests.append(contentsOf: result)
   }
 

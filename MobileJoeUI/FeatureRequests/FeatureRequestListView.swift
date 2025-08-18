@@ -24,6 +24,7 @@ public struct FeatureRequestListView: View {
   @State private var isLoading = true
 
   public var body: some View {
+    let _ = Self._printChanges()
     NavigationView {
       List {
         ForEach(featureRequests.all) { featureRequest in
@@ -43,6 +44,7 @@ public struct FeatureRequestListView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: ToolbarItems)
     }
+    .searchable(text: $featureRequests.search)
     .task {
       await reload()
     }

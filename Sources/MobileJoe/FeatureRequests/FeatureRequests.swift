@@ -13,6 +13,7 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -35,10 +36,26 @@ public class FeatureRequests {
     }
   }
 
+  public var search: String = "" {
+    didSet {
+      print("Did Set: \(search)")
+      let newSearchTask = Task {
+        do {
+          /// Sleep for 0.5 seconds to wait for a pause in typing before executing the search.
+          try await Task.sleep(for: .seconds(1))
+          try? await reload()
+        } catch {
+        }
+      }
+      currentSearchTask = newSearchTask
+    }
+  }
+
   public var isEmpty: Bool {
     all.isEmpty
   }
 
+  private var currentSearchTask: Task<Void, Never>?
   private let gateway: FeatureRequestGateway
 
   public init(gateway: FeatureRequestGateway? = nil) {
@@ -46,12 +63,12 @@ public class FeatureRequests {
   }
 
   public func load() async throws {
-    try await gateway.load(filterBy: filtering.toStatus, sort: sorting)
+    try await gateway.load(filterBy: filtering.toStatus, sort: sorting, search: search)
     all = gateway.featureRequests
   }
 
   public func reload() async throws {
-    try await gateway.reload(filterBy: filtering.toStatus, sort: sorting)
+    try await gateway.reload(filterBy: filtering.toStatus, sort: sorting, search: search)
     all = gateway.featureRequests
   }
 
