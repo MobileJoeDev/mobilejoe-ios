@@ -36,14 +36,14 @@ struct FeatureRequestsTests {
     #expect(subject.all.count == 3)
 
     subject.filtering = .planned
-    try await Task.sleep(for: .milliseconds(50))
+    try await Task.sleep(nanoseconds: 1)
 
     let featureRequest = try #require(subject.all.first)
     #expect(featureRequest.status == .planned)
     #expect(subject.all.count == 1)
 
     subject.filtering = .all
-    try await Task.sleep(for: .milliseconds(50))
+    try await Task.sleep(nanoseconds: 1)
 
     #expect(subject.all.count == 3)
   }

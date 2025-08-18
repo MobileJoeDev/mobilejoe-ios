@@ -14,7 +14,7 @@
 
 import Foundation
 
-struct Pagination: Equatable, Sendable {
+struct Pagination: Equatable {
   let currentPage: Int
   let totalPages: Int
   let totalCount: Int

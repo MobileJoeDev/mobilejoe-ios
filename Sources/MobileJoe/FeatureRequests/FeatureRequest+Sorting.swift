@@ -15,7 +15,7 @@
 import Foundation
 
 extension FeatureRequest {
-  public enum Sorting: String, CaseIterable, Identifiable, Sendable {
+  public enum Sorting: String, CaseIterable, Identifiable {
     case byNewest = "created"
     case byScore = "score"
     

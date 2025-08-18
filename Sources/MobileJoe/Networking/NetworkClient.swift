@@ -15,18 +15,23 @@
 import Foundation
 import OSLog
 
-let sharedNetworkClient = NetworkClient()
-
-actor NetworkClient {
-  // No static shared property to satisfy Swift 6 strict concurrency
+@MainActor
+class NetworkClient {
+  static let shared = NetworkClient()
 
   @discardableResult
   static func configure(withAPIKey apiKey: String, externalID: String?) async throws -> NetworkClient {
-    try await sharedNetworkClient.configure(withAPIKey: apiKey, externalID: externalID)
+    shared.apiKey = apiKey
+    try await NetworkClient.identify(externalID: externalID)
+    return shared
   }
 
   static func identify(externalID: String?) async throws {
-    try await sharedNetworkClient.setIdentity(externalID: externalID)
+    shared.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
+  }
+
+  static var isConfigured: Bool {
+    shared.apiKey.isNotEmpty
   }
 
   private static let serverHostURL = URL(string: "https://mbj-api.com")!
@@ -39,17 +44,6 @@ actor NetworkClient {
 
   init(router: Router = DefaultRouter()) {
     self.router = router
-  }
-
-  // MARK: - Actor-isolated helpers
-  private func configure(withAPIKey apiKey: String, externalID: String?) async throws -> NetworkClient {
-    self.apiKey = apiKey
-    try await setIdentity(externalID: externalID)
-    return self
-  }
-
-  private func setIdentity(externalID: String?) async throws {
-    self.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
   }
 }
 
@@ -93,7 +87,7 @@ extension NetworkClient {
 // MARK: - Helper
 extension NetworkClient {
   private func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse) {
-    guard apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
+    guard NetworkClient.isConfigured else { throw MobileJoeError.notConfigured }
     return try await router.perform(request)
   }
 

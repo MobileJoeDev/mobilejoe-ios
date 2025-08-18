@@ -14,15 +14,17 @@
 
 import Foundation
 
-public protocol FeatureRequestGateway: Sendable {
+@MainActor
+public protocol FeatureRequestGateway {
   var featureRequests: [FeatureRequest] { get }
   func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws
   func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
-final class RemoteFeatureRequestGateway: FeatureRequestGateway, @unchecked Sendable {
-  @MainActor static var shared = RemoteFeatureRequestGateway()
+@MainActor
+class RemoteFeatureRequestGateway: FeatureRequestGateway {
+  static var shared = RemoteFeatureRequestGateway()
 
   private let parser: FeatureRequestParser
   private let client: NetworkClient
@@ -30,7 +32,7 @@ final class RemoteFeatureRequestGateway: FeatureRequestGateway, @unchecked Senda
 
   init() {
     self.parser = FeatureRequestParser()
-    self.client = sharedNetworkClient
+    self.client = NetworkClient.shared
     self.pagination = Pagination()
   }
 
