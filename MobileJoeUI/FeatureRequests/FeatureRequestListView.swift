@@ -22,6 +22,7 @@ public struct FeatureRequestListView: View {
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
   @State private var isLoading = true
+  @State private var searchText: String = ""
 
   public var body: some View {
     let _ = Self._printChanges()
@@ -44,7 +45,10 @@ public struct FeatureRequestListView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: ToolbarItems)
     }
-    .searchable(text: $featureRequests.search)
+    .searchable(text: $searchText)
+    .onChange(of: searchText) { _, newValue in
+      search(for: newValue)
+    }
     .task {
       await reload()
     }
@@ -156,6 +160,12 @@ extension FeatureRequestListView {
       } catch {
         self.error = error
       }
+    }
+  }
+
+  private func search(for text: String) {
+    Task {
+      try? await featureRequests.search(for: text)
     }
   }
 

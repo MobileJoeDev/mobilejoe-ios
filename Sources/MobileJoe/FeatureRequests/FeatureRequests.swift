@@ -36,26 +36,17 @@ public class FeatureRequests {
     }
   }
 
-  public var search: String = "" {
-    didSet {
-      print("Did Set: \(search)")
-      let newSearchTask = Task {
-        do {
-          /// Sleep for 0.5 seconds to wait for a pause in typing before executing the search.
-          try await Task.sleep(for: .seconds(1))
-          try? await reload()
-        } catch {
-        }
-      }
-      currentSearchTask = newSearchTask
-    }
+  public func search(for searchText: String) async throws {
+    guard searchText != search else { return }
+    search = searchText
+    try await reload()
   }
 
   public var isEmpty: Bool {
     all.isEmpty
   }
 
-  private var currentSearchTask: Task<Void, Never>?
+  private var search: String = ""
   private let gateway: FeatureRequestGateway
 
   public init(gateway: FeatureRequestGateway? = nil) {
