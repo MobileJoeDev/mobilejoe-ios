@@ -39,7 +39,19 @@ public class FeatureRequests {
   public func search(for searchText: String) async throws {
     guard searchText != search else { return }
     search = searchText
-    try await reload()
+    debounceSearch()
+  }
+
+  private func debounceSearch() {
+    searchDebounceTask?.cancel()
+    searchDebounceTask = Task { [weak self] in
+      do {
+        try await Task.sleep(for: .seconds(1))
+        guard !Task.isCancelled, let self else { return }
+        try? await reload()
+      } catch {
+      }
+    }
   }
 
   public var isEmpty: Bool {
@@ -47,10 +59,15 @@ public class FeatureRequests {
   }
 
   private var search: String = ""
+  nonisolated(unsafe) private var searchDebounceTask: Task<Void, Never>? = nil
   private let gateway: FeatureRequestGateway
 
   public init(gateway: FeatureRequestGateway? = nil) {
     self.gateway = gateway ?? RemoteFeatureRequestGateway.shared
+  }
+
+  deinit {
+    searchDebounceTask?.cancel()
   }
 
   public func load() async throws {
