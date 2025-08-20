@@ -46,7 +46,7 @@ public class FeatureRequests {
     searchDebounceTask?.cancel()
     searchDebounceTask = Task { [weak self] in
       do {
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleep(for: .seconds(0.35))
         guard !Task.isCancelled, let self else { return }
         try? await reload()
       } catch {
