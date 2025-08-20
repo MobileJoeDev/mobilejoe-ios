@@ -25,7 +25,6 @@ public struct FeatureRequestListView: View {
   @State private var searchText: String = ""
 
   public var body: some View {
-    let _ = Self._printChanges()
     NavigationView {
       List {
         ForEach(featureRequests.all) { featureRequest in
