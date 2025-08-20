@@ -32,7 +32,7 @@ struct FeatureRequestListRow: View {
               .lineLimit(nil)
               .fixedSize(horizontal: false, vertical: true)
             
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
               FeatureRequestStatusView(status:  featureRequest.status)
               Text(featureRequest.createdAt, style: .date)
                 .foregroundStyle(.secondary)
