@@ -13,6 +13,7 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -35,23 +36,47 @@ public class FeatureRequests {
     }
   }
 
+  public func search(for searchText: String) async throws {
+    guard searchText != search else { return }
+    search = searchText
+    debounceSearch()
+  }
+
+  private func debounceSearch() {
+    searchDebounceTask?.cancel()
+    searchDebounceTask = Task { [weak self] in
+      do {
+        try await Task.sleep(for: .seconds(1))
+        guard !Task.isCancelled, let self else { return }
+        try? await reload()
+      } catch {
+      }
+    }
+  }
+
   public var isEmpty: Bool {
     all.isEmpty
   }
 
+  private var search: String = ""
+  nonisolated(unsafe) private var searchDebounceTask: Task<Void, Never>? = nil
   private let gateway: FeatureRequestGateway
 
   public init(gateway: FeatureRequestGateway? = nil) {
     self.gateway = gateway ?? RemoteFeatureRequestGateway.shared
   }
 
+  deinit {
+    searchDebounceTask?.cancel()
+  }
+
   public func load() async throws {
-    try await gateway.load(filterBy: filtering.toStatus, sort: sorting)
+    try await gateway.load(filterBy: filtering.toStatus, sort: sorting, search: search)
     all = gateway.featureRequests
   }
 
   public func reload() async throws {
-    try await gateway.reload(filterBy: filtering.toStatus, sort: sorting)
+    try await gateway.reload(filterBy: filtering.toStatus, sort: sorting, search: search)
     all = gateway.featureRequests
   }
 

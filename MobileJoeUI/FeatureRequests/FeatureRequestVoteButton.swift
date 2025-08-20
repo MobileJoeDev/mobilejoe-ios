@@ -23,16 +23,17 @@ struct FeatureRequestVoteButton: View {
     Button {
       vote(featureRequest)
     } label: {
-      VStack(spacing: 4) {
+      VStack(spacing: 2) {
         Image(systemName: "chevron.up")
-          .font(.caption)
+          .font(.caption2)
         Text(featureRequest.score, format: .number.notation(.compactName))
           .lineLimit(1)
           .minimumScaleFactor(0.5)
+          .font(.subheadline)
       }
       .foregroundStyle(foregroundColor)
       .aspectRatio(1.0, contentMode: .fill)
-      .frame(maxWidth: 32)
+      .frame(maxWidth: 28)
       .padding(8)
       .background(
         RoundedRectangle(cornerRadius: 8, style: .continuous)

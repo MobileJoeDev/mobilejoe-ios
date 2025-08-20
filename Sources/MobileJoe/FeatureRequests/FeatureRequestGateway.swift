@@ -17,8 +17,8 @@ import Foundation
 @MainActor
 public protocol FeatureRequestGateway {
   var featureRequests: [FeatureRequest] { get }
-  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?) async throws
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?) async throws
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
@@ -38,15 +38,19 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
 
   var featureRequests = [FeatureRequest]()
 
-  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws {
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?) async throws {
     pagination = Pagination()
     featureRequests.removeAll()
-    try await load(filterBy: statuses, sort: sort)
+    guard let nextPage = pagination.nextPage else { return }
+    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, search: search, page: nextPage)
+    pagination = response.pagination
+    let result: [FeatureRequest] = try parser.parse(response.data)
+    featureRequests = result
   }
 
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting) async throws {
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?) async throws {
     guard let nextPage = pagination.nextPage else { return }
-    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, page: nextPage)
+    let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, search: search, page: nextPage)
     pagination = response.pagination
     let result: [FeatureRequest] = try parser.parse(response.data)
     featureRequests.append(contentsOf: result)
