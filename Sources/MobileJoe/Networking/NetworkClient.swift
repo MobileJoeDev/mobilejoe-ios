@@ -49,9 +49,9 @@ class NetworkClient {
 
 // MARK: - FeatureRequests
 extension NetworkClient {
-  func getFeatureRequests(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, page: Int) async throws -> (data: Data, pagination: Pagination) {
+  func getFeatureRequests(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?, page: Int) async throws -> (data: Data, pagination: Pagination) {
     var components = try url(for: "feature_requests")
-    components.queryItems = statusesQueryItems(for: statuses) + sortQueryItems(for: sorting) + pageQueryItems(for: page)
+    components.queryItems = searchQueryItems(for: search) + statusesQueryItems(for: statuses) + sortQueryItems(for: sorting) + pageQueryItems(for: page)
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
     let request = try urlRequest(for: url, httpMethod: .get)
     let result = try await perform(request)
@@ -72,6 +72,11 @@ extension NetworkClient {
 
   private func sortQueryItems(for sorting: FeatureRequest.Sorting) -> [URLQueryItem] {
     [URLQueryItem(name: "sort", value: sorting.rawValue)]
+  }
+
+  private func searchQueryItems(for search: String?) -> [URLQueryItem] {
+    guard let search, search.isNotEmpty else { return [] }
+    return [URLQueryItem(name: "search", value: "\(search)")]
   }
 
   private func pageQueryItems(for page: Int) -> [URLQueryItem] {

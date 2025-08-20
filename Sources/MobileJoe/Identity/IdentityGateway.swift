@@ -91,9 +91,9 @@ class FileBasedIdentityGateway: IdentityGateway {
 
   private func findOrCreateIdentityURL() {
     do {
-      try fileManager.createDirectory(at: Self.mbjDirectory, withIntermediateDirectories: false)
+      try fileManager.createDirectory(at: Self.mbjDirectory, withIntermediateDirectories: true)
     } catch {
-      logger.error("Joe says: Failed to create MobileJoe support directory.")
+      logger.error("Joe says: Failed to create MobileJoe support directory. Error: \(error.localizedDescription)")
     }
   }
 }

@@ -23,7 +23,7 @@ class FeatureRequestGatewayMock: FeatureRequestGateway {
     container
   }
 
-  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws {
+  func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws {
     container = allReturnValue
       .filter { fr in
         guard let statuses else { return true }
@@ -31,7 +31,7 @@ class FeatureRequestGatewayMock: FeatureRequestGateway {
       }
   }
 
-  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting) async throws {
+  func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws {
     container = allReturnValue
       .filter { fr in
         guard let statuses else { return true }
