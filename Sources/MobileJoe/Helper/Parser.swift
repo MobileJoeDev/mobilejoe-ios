@@ -7,18 +7,15 @@
 //
 //      https://opensource.org/licenses/MIT
 //
-//  FeatureRequest+Sorting.swift
+//  Parser.swift
 //
-//  Created by Florian Mielke on 02.07.25.
+//  Created by Florian Mielke on 26.09.25.
 //
 
 import Foundation
 
-extension FeatureRequest {
-  public enum Sorting: String, CaseIterable, Identifiable {
-    case byNewest = "created"
-    case byScore = "score"
-    
-    public var id: Self { self }
+class Parser {
+  func parse<T: Decodable>(_ data: Data) throws -> T {
+    try JSONDecoder.shared.decode(T.self, from: data)
   }
 }

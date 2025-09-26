@@ -15,7 +15,6 @@
 import Testing
 @testable import MobileJoe
 
-@MainActor
 struct IdentityManagerTests {
   let manager: IdentityManager
   let gatewayMock: IdentityGatewayMock

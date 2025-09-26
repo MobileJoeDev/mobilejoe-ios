@@ -15,7 +15,6 @@
 import Foundation
 import Observation
 
-@MainActor
 @Observable
 public class FeatureRequests {
   public var all = [FeatureRequest]()

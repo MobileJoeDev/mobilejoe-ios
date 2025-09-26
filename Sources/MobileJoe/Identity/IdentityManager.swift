@@ -14,7 +14,6 @@
 
 import Foundation
 
-@MainActor
 class IdentityManager {
   static let shared = IdentityManager()
 

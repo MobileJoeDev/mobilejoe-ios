@@ -15,7 +15,6 @@
 import Foundation
 import OSLog
 
-@MainActor
 class NetworkClient {
   static let shared = NetworkClient()
 
@@ -81,6 +80,17 @@ extension NetworkClient {
 
   private func pageQueryItems(for page: Int) -> [URLQueryItem] {
     [URLQueryItem(name: "page", value: "\(page)")]
+  }
+}
+
+// MARK: - Alerts
+extension NetworkClient {
+  func getAlerts() async throws -> Data {
+    let components = try url(for: "alerts")
+    guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
+    let request = try urlRequest(for: url, httpMethod: .get)
+    let result = try await perform(request)
+    return result.data
   }
 }
 

@@ -14,7 +14,6 @@
 
 import Foundation
 
-@MainActor
 public protocol FeatureRequestGateway {
   var featureRequests: [FeatureRequest] { get }
   func reload(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?) async throws
@@ -22,16 +21,13 @@ public protocol FeatureRequestGateway {
   func vote(_ featureRequest: FeatureRequest) async throws
 }
 
-@MainActor
 class RemoteFeatureRequestGateway: FeatureRequestGateway {
   static var shared = RemoteFeatureRequestGateway()
 
-  private let parser: FeatureRequestParser
   private let client: NetworkClient
   private var pagination: Pagination
 
   init() {
-    self.parser = FeatureRequestParser()
     self.client = NetworkClient.shared
     self.pagination = Pagination()
   }
@@ -44,7 +40,7 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
     guard let nextPage = pagination.nextPage else { return }
     let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, search: search, page: nextPage)
     pagination = response.pagination
-    let result: [FeatureRequest] = try parser.parse(response.data)
+    let result: [FeatureRequest] = try Parser().parse(response.data)
     featureRequests = result
   }
 
@@ -52,13 +48,13 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
     guard let nextPage = pagination.nextPage else { return }
     let response = try await client.getFeatureRequests(filterBy: statuses, sort: sorting, search: search, page: nextPage)
     pagination = response.pagination
-    let result: [FeatureRequest] = try parser.parse(response.data)
+    let result: [FeatureRequest] = try Parser().parse(response.data)
     featureRequests.append(contentsOf: result)
   }
 
   func vote(_ featureRequest: FeatureRequest) async throws {
     let response = try await client.postVoteFeatureRequests(featureRequestID: featureRequest.id)
-    let votedFeatureRequest: FeatureRequest = try parser.parse(response)
+    let votedFeatureRequest: FeatureRequest = try Parser().parse(response)
     try featureRequests.replace(featureRequest, with: votedFeatureRequest)
   }
 }

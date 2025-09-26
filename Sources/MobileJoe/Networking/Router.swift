@@ -14,7 +14,6 @@
 
 import Foundation
 
-@MainActor
 protocol Router {
   func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse)
 }

@@ -14,6 +14,60 @@
 
 import Foundation
 
+public class AlertsFixture: Alerts {
+  public static var empty = AlertsFixture()
+
+  public static var multiple: AlertsFixture {
+    let alerts = AlertsFixture()
+    alerts.all = [
+      Alert(
+        id: 1,
+        title: "Critical error",
+        message: "Please update version.",
+        kind: .error,
+        dismissive: .never,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      ),
+      Alert(
+        id: 2,
+        title: "DB down",
+        message: "Please be patient and stay tuned for further updates. We're working hard.",
+        kind: .error,
+        dismissive: .never,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      ),
+      Alert(
+        id: 3,
+        title: nil,
+        message: "Please be patient and stay tuned for further updates. We're working hard.",
+        kind: .error,
+        dismissive: .never,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      )
+    ]
+    return alerts
+  }
+
+  public static var one: AlertsFixture {
+    let alerts = AlertsFixture()
+    alerts.all = [
+      Alert(
+        id: 1,
+        title: "Critical error",
+        message: "Please update version.",
+        kind: .error,
+        dismissive: .never,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      )
+    ]
+    return alerts
+  }
+}
+
 public class FeatureRequestsFixture: FeatureRequests {
   public static var empty = FeatureRequestsFixture()
 

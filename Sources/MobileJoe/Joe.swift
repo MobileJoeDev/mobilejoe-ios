@@ -7,16 +7,15 @@
 //
 //      https://opensource.org/licenses/MIT
 //
-//  MobileJoe.swift
+//  Joe.swift
 //
 //  Created by Florian Mielke on 20.03.25.
 //
 
 import Foundation
 
-@MainActor
 @Observable
-public class MobileJoe {
+public class Joe {
   public static func configure(withAPIKey apiKey: String, appUserID: String? = nil) {
     Task {
       try? await NetworkClient.configure(withAPIKey: apiKey, externalID: appUserID)

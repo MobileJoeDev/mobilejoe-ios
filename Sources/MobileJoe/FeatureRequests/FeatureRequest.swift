@@ -47,3 +47,24 @@ public struct FeatureRequest: Identifiable, Hashable, Codable, Sendable {
     lhs.id == rhs.id
   }
 }
+
+extension FeatureRequest {
+  public enum Sorting: String, CaseIterable, Identifiable {
+    case byNewest = "created"
+    case byScore = "score"
+
+    public var id: Self { self }
+  }
+}
+
+extension FeatureRequest {
+  public enum Status: String {
+    case unknown = "unknown"
+    case open = "open"
+    case underReview = "under_review"
+    case planned = "planned"
+    case inProgress = "in_progress"
+    case completed = "completed"
+    case closed = "closed"
+  }
+}
