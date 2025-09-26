@@ -14,7 +14,7 @@
 
 import Foundation
 
-public struct FeatureRequest: Identifiable, Hashable, Codable, Sendable {
+public struct FeatureRequest: Identifiable, Hashable, Codable {
   public let id: Int
   public let title: String
   public let body: String

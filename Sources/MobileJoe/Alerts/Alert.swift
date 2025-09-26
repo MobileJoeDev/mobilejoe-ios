@@ -14,7 +14,7 @@
 
 import Foundation
 
-public struct Alert: Identifiable, Hashable, Codable, Sendable {
+public struct Alert: Identifiable, Hashable, Codable {
   public let id: Int
   public let title: String?
   public let message: String
@@ -43,7 +43,7 @@ public struct Alert: Identifiable, Hashable, Codable, Sendable {
 }
 
 extension Alert {
-  public enum Kind: String, Codable, Sendable {
+  public enum Kind: String, Codable {
     case info
     case warning
     case error
@@ -51,7 +51,7 @@ extension Alert {
 }
 
 extension Alert {
-  public enum Dismissive: String, Codable, Sendable {
+  public enum Dismissive: String, Codable {
     case interactively
     case never
     case temporarily
