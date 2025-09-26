@@ -22,6 +22,7 @@ struct AlertsStackView: View {
     VStack {
       ForEach(alerts.all) { alert in
         AlertView(alert: alert)
+          .clipShape(.containerRelative)
       }
     }
   }

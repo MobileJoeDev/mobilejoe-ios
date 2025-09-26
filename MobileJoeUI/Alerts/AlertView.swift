@@ -22,6 +22,7 @@ struct AlertView: View {
     HStack(alignment: .firstTextBaseline, spacing: 10) {
       Image(systemName: "exclamationmark.triangle")
         .fontWeight(.bold)
+        .symbolRenderingMode(.hierarchical)
       VStack(alignment: .leading) {
         if let title = alert.title {
           Text(title)
@@ -36,7 +37,6 @@ struct AlertView: View {
     .padding(.horizontal, 14)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(Color.destructive)
-    .clipShape(.capsule)
   }
 }
 
