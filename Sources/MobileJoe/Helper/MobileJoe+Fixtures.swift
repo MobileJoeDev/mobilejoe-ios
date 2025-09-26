@@ -42,7 +42,7 @@ public class AlertsFixture: Alerts {
         id: 3,
         title: nil,
         message: "Please be patient and stay tuned for further updates. We're working hard.",
-        kind: .error,
+        kind: .warning,
         dismissive: .never,
         createdAt: .distantPast,
         updatedAt: .distantPast
