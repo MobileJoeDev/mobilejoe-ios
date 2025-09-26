@@ -18,8 +18,6 @@ import MobileJoe
 struct AlertView: View {
   let alert: MobileJoe.Alert
 
-  @State private var showingMessage = false
-
   var body: some View {
     HStack(alignment: .firstTextBaseline, spacing: 10) {
       Image(systemName: "exclamationmark.triangle")
@@ -27,21 +25,11 @@ struct AlertView: View {
         .symbolRenderingMode(.hierarchical)
       VStack(alignment: .leading) {
         if let title = alert.title {
-          Button(action: toggleMessage) {
-            HStack {
-              Text(title)
-                .fontWeight(.bold)
-              Spacer()
-              Image(systemName: toggleMessageIconName)
-            }
-          }
-
-          if showingMessage {
-            Text(alert.message)
-          }
-        } else {
-          Text(alert.message)
+          Text(title)
+            .fontWeight(.bold)
         }
+
+        Text(alert.message)
       }
     }
     .font(.subheadline)
@@ -67,16 +55,6 @@ extension AlertView {
     case .info: .black
     case .warning: .black
     case .error: .white
-    }
-  }
-
-  private var toggleMessageIconName: String {
-    showingMessage ? "chevron.up" : "chevron.down"
-  }
-
-  private func toggleMessage() {
-    withAnimation {
-      showingMessage.toggle()
     }
   }
 }

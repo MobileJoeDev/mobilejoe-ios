@@ -19,21 +19,17 @@ public struct FeatureRequest: Identifiable, Hashable, Codable, Sendable {
   public let title: String
   public let body: String
   public let score: Int
-  public let statusIdentifier: String
+  public let status: Status
   public let createdAt: Date
   public let updatedAt: Date
   public let isVoted: Bool
-
-  public var status: Status {
-    Status(rawValue: statusIdentifier) ?? .unknown
-  }
 
   private enum CodingKeys: String, CodingKey {
     case id
     case title
     case body
     case score
-    case statusIdentifier = "status_identifier"
+    case status = "status_identifier"
     case createdAt = "created_at"
     case updatedAt = "updated_at"
     case isVoted = "voted"
@@ -58,7 +54,7 @@ extension FeatureRequest {
 }
 
 extension FeatureRequest {
-  public enum Status: String {
+  public enum Status: String, Codable {
     case unknown = "unknown"
     case open = "open"
     case underReview = "under_review"
