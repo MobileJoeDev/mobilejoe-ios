@@ -25,6 +25,9 @@ struct AlertsStackView: View {
           .clipShape(.containerRelative)
       }
     }
+    .task {
+      try? await alerts.load()
+    }
   }
 }
 

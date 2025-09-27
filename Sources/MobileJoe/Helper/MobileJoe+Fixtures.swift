@@ -22,28 +22,25 @@ public class AlertsFixture: Alerts {
     alerts.all = [
       Alert(
         id: 1,
-        title: "Critical error",
+        title: "Critical error.",
         message: "Please update version.",
         kind: .error,
-        dismissive: .never,
         createdAt: .distantPast,
         updatedAt: .distantPast
       ),
       Alert(
         id: 2,
-        title: "DB down",
-        message: "Please be patient and stay tuned for further updates. We're working hard.",
+        title: "Please be patient and stay tuned for further updates. We're working hard.",
+        message: "It wasn't out fault, it was Apple's. That's the way it is. So don't blame us. We might switch to Android in the future to be more flexible and rally free.",
         kind: .error,
-        dismissive: .never,
         createdAt: .distantPast,
         updatedAt: .distantPast
       ),
       Alert(
         id: 3,
-        title: nil,
-        message: "Please be patient and stay tuned for further updates. We're working hard.",
+        title: "Please be patient and stay tuned for further updates. We're working hard.",
+        message: nil,
         kind: .warning,
-        dismissive: .never,
         createdAt: .distantPast,
         updatedAt: .distantPast
       )
@@ -56,10 +53,9 @@ public class AlertsFixture: Alerts {
     alerts.all = [
       Alert(
         id: 1,
-        title: "Critical error",
+        title: "Please be patient and stay tuned for further updates. We're working hard.",
         message: "Please update version.",
         kind: .error,
-        dismissive: .never,
         createdAt: .distantPast,
         updatedAt: .distantPast
       )

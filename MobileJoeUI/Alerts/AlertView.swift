@@ -18,44 +18,46 @@ import MobileJoe
 struct AlertView: View {
   let alert: MobileJoe.Alert
 
-  var body: some View {
-    HStack(alignment: .firstTextBaseline, spacing: 10) {
-      Image(systemName: "exclamationmark.triangle")
-        .fontWeight(.bold)
-        .symbolRenderingMode(.hierarchical)
-      VStack(alignment: .leading) {
-        if let title = alert.title {
-          Text(title)
-            .fontWeight(.bold)
-        }
+  @State private var showingMessage = false
 
-        Text(alert.message)
+  var body: some View {
+    Button(action: toggleShowingMessage) {
+      HStack(alignment: .firstTextBaseline, spacing: 10) {
+        Image(systemName: "exclamationmark.triangle")
+          .fontWeight(.bold)
+        AlertText()
+          .multilineTextAlignment(.leading)
+      }
+      .font(.subheadline)
+      .foregroundStyle(alert.foregroundColor)
+      .padding(12)
+      .padding(.horizontal, 14)
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .background(alert.backgroundColor)
+    }
+    .sheet(isPresented: $showingMessage) {
+      NavigationStack {
+        AlertDetailsView(alert: alert)
+          .foregroundStyle(Color.primary)
       }
     }
-    .font(.subheadline)
-    .foregroundStyle(foregroundColor)
-    .padding(12)
-    .padding(.horizontal, 14)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .background(backgroundColor)
   }
 }
 
 extension AlertView {
-  private var backgroundColor: Color {
-    switch alert.kind {
-    case .info: .warning
-    case .warning: .warning
-    case .error: .destructive
+  private func AlertText() -> Text {
+    if let _ = alert.message {
+      Text(alert.title) +
+      Text(verbatim: " ") +
+      Text(Image(systemName: "info.circle"))
+        .font(.caption)
+    } else {
+      Text(alert.title)
     }
   }
 
-  private var foregroundColor: Color {
-    switch alert.kind {
-    case .info: .black
-    case .warning: .black
-    case .error: .white
-    }
+  private func toggleShowingMessage() {
+    showingMessage.toggle()
   }
 }
 

@@ -4,6 +4,22 @@
     "" : {
 
     },
+    "alert.details.created:%@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstellt: %(variableName)@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Created: %1$(variableName)@"
+          }
+        }
+      }
+    },
     "content-unavailable.failure.text" : {
       "localizations" : {
         "de" : {

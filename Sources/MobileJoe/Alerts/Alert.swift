@@ -16,10 +16,9 @@ import Foundation
 
 public struct Alert: Identifiable, Hashable, Codable {
   public let id: Int
-  public let title: String?
-  public let message: String
+  public let title: String
+  public let message: String?
   public let kind: Kind
-  public let dismissive: Dismissive
   public let createdAt: Date
   public let updatedAt: Date
 
@@ -28,7 +27,6 @@ public struct Alert: Identifiable, Hashable, Codable {
     case title
     case message
     case kind
-    case dismissive
     case createdAt = "created_at"
     case updatedAt = "updated_at"
   }
@@ -47,13 +45,5 @@ extension Alert {
     case info
     case warning
     case error
-  }
-}
-
-extension Alert {
-  public enum Dismissive: String, Codable {
-    case interactively
-    case never
-    case temporarily
   }
 }
