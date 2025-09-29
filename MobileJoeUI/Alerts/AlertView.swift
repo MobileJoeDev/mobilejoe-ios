@@ -18,15 +18,20 @@ import MobileJoe
 struct AlertView: View {
   let alert: MobileJoe.Alert
 
-  @State private var showingMessage = false
+  @State private var showingDetails = false
 
   var body: some View {
-    Button(action: toggleShowingMessage) {
-      HStack(alignment: .firstTextBaseline, spacing: 10) {
-        Image(systemName: "exclamationmark.triangle")
-          .fontWeight(.bold)
-        AlertText()
-          .multilineTextAlignment(.leading)
+    Button(action: toggleShowingDetails) {
+      HStack {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+          Image(systemName: "exclamationmark.triangle")
+            .fontWeight(.bold)
+          Text(alert.title)
+            .multilineTextAlignment(.leading)
+        }
+
+        Spacer()
+        Image(systemName: "chevron.right")
       }
       .font(.subheadline)
       .foregroundStyle(alert.foregroundColor)
@@ -35,7 +40,7 @@ struct AlertView: View {
       .frame(maxWidth: .infinity, alignment: .leading)
       .background(alert.backgroundColor)
     }
-    .sheet(isPresented: $showingMessage) {
+    .sheet(isPresented: $showingDetails) {
       NavigationStack {
         AlertDetailsView(alert: alert)
           .foregroundStyle(Color.primary)
@@ -45,19 +50,8 @@ struct AlertView: View {
 }
 
 extension AlertView {
-  private func AlertText() -> Text {
-    if let _ = alert.message {
-      Text(alert.title) +
-      Text(verbatim: " ") +
-      Text(Image(systemName: "info.circle"))
-        .font(.caption)
-    } else {
-      Text(alert.title)
-    }
-  }
-
-  private func toggleShowingMessage() {
-    showingMessage.toggle()
+  private func toggleShowingDetails() {
+    showingDetails.toggle()
   }
 }
 
