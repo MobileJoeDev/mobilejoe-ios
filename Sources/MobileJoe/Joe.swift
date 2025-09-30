@@ -16,9 +16,9 @@ import Foundation
 
 @Observable
 public class Joe {
-  public static func configure(withAPIKey apiKey: String, appUserID: String? = nil) {
+  public static func configure(withAPIKey apiKey: String, appUserID: String? = nil, devModeEnabled: Bool = false) {
     Task {
-      try? await NetworkClient.configure(withAPIKey: apiKey, externalID: appUserID)
+      try? await NetworkClient.configure(withAPIKey: apiKey, externalID: appUserID, devModeEnabled: devModeEnabled)
     }
   }
 

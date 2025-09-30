@@ -29,7 +29,7 @@ public struct FeatureRequest: Identifiable, Hashable, Codable {
     case title
     case body
     case score
-    case status = "status_identifier"
+    case status
     case createdAt = "created_at"
     case updatedAt = "updated_at"
     case isVoted = "voted"

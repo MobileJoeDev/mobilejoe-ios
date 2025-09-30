@@ -19,8 +19,9 @@ class NetworkClient {
   static let shared = NetworkClient()
 
   @discardableResult
-  static func configure(withAPIKey apiKey: String, externalID: String?) async throws -> NetworkClient {
+  static func configure(withAPIKey apiKey: String, externalID: String?, devModeEnabled: Bool = false) async throws -> NetworkClient {
     shared.apiKey = apiKey
+    shared.devModeEnabled = devModeEnabled
     try await NetworkClient.identify(externalID: externalID)
     return shared
   }
@@ -36,6 +37,7 @@ class NetworkClient {
   private static let serverHostURL = URL(string: "https://mbj-api.com")!
   private static let apiVersion = "v1"
 
+  private var devModeEnabled = false
   private var apiKey: String = ""
   private var identity: Identity?
   private let router: Router
@@ -112,6 +114,7 @@ extension NetworkClient {
     request.setValue(SystemInfo.appVersion, forHTTPHeaderField: "App-Version")
     request.setValue(SystemInfo.buildVersion, forHTTPHeaderField: "App-Build-Version")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+    request.setValue("\(devModeEnabled)", forHTTPHeaderField: "Dev-Mode-Enabled")
     request.setValue(identity.anonymousID, forHTTPHeaderField: "Identity-Anonymous-ID")
     if let externalID = identity.externalID {
       request.setValue(externalID, forHTTPHeaderField: "Identity-External-ID")
