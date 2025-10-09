@@ -19,6 +19,7 @@ public struct Alert: Identifiable, Hashable, Codable {
   public let title: String
   public let message: String?
   public let kind: Kind
+  public let occurredAt: Date
   public let createdAt: Date
   public let updatedAt: Date
 
@@ -27,6 +28,7 @@ public struct Alert: Identifiable, Hashable, Codable {
     case title
     case message
     case kind
+    case occurredAt = "occurred_at"
     case createdAt = "created_at"
     case updatedAt = "updated_at"
   }

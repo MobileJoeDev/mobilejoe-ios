@@ -25,6 +25,7 @@ public class AlertsFixture: Alerts {
         title: "Critical error.",
         message: "Please update version.",
         kind: .error,
+        occurredAt: .distantPast,
         createdAt: .distantPast,
         updatedAt: .distantPast
       ),
@@ -33,6 +34,7 @@ public class AlertsFixture: Alerts {
         title: "Please be patient and stay tuned for further updates. We're working hard.",
         message: "It wasn't out fault, it was Apple's. That's the way it is. So don't blame us. We might switch to Android in the future to be more flexible and rally free.",
         kind: .error,
+        occurredAt: .distantPast,
         createdAt: .distantPast,
         updatedAt: .distantPast
       ),
@@ -41,6 +43,7 @@ public class AlertsFixture: Alerts {
         title: "Please be patient and stay tuned for further updates. We're working hard.",
         message: nil,
         kind: .warning,
+        occurredAt: .distantPast,
         createdAt: .distantPast,
         updatedAt: .distantPast
       )
@@ -56,6 +59,7 @@ public class AlertsFixture: Alerts {
         title: "Please be patient and stay tuned for further updates. We're working hard.",
         message: "Please update version.",
         kind: .error,
+        occurredAt: .distantPast,
         createdAt: .distantPast,
         updatedAt: .distantPast
       )

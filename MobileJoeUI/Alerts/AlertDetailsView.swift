@@ -59,7 +59,7 @@ struct AlertDetailsView: View {
 
 extension AlertDetailsView {
   private func Footer() -> some View {
-    Text(String(localized:"alert.details.created:\(alert.createdAt.formatted(date: .complete, time: .shortened))", bundle: .module))
+    Text(String(localized:"alert.details.occurred:\(alert.occurredAt.formatted(date: .complete, time: .shortened))", bundle: .module))
   }
 }
 

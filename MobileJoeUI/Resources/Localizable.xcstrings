@@ -4,18 +4,18 @@
     "" : {
 
     },
-    "alert.details.created:%@" : {
+    "alert.details.occurred:%@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erstellt: %(variableName)@"
+            "value" : "Seit: %1$(variableName)@"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Created: %1$(variableName)@"
+            "value" : "Occurred: %1$(variableName)@"
           }
         }
       }
