@@ -24,8 +24,8 @@ class RemoteAlertGateway: AlertGateway {
 
   private let client: NetworkClient
 
-  init() {
-    self.client = NetworkClient.shared
+  init(client: NetworkClient = NetworkClient.shared) {
+    self.client = client
   }
 
   var alerts = [Alert]()

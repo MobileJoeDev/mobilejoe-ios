@@ -38,14 +38,17 @@ class NetworkClient {
   private static let serverHostURL = URL(string: "https://mbj-api.com")!
   private static let apiVersion = "v1"
 
-  private var debugMode = false
-  private var apiKey: String = ""
+  private var debugMode: Bool
+  private var apiKey: String
   private var identity: Identity?
   private let router: Router
   private let logger: Logger = Logger(subsystem: "MobileJoe", category: "NetworkClient")
 
-  init(router: Router = DefaultRouter()) {
+  init(router: Router = DefaultRouter(), debugMode: Bool = false, apiKey: String = "", identity: Identity? = nil) {
     self.router = router
+    self.debugMode = debugMode
+    self.apiKey = apiKey
+    self.identity = identity
   }
 }
 
@@ -109,7 +112,7 @@ extension NetworkClient {
 // MARK: - Helper
 extension NetworkClient {
   private func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse) {
-    guard NetworkClient.isConfigured else { throw MobileJoeError.notConfigured }
+    guard apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
     return try await router.perform(request)
   }
 

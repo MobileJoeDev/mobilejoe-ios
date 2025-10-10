@@ -27,9 +27,9 @@ class RemoteFeatureRequestGateway: FeatureRequestGateway {
   private let client: NetworkClient
   private var pagination: Pagination
 
-  init() {
-    self.client = NetworkClient.shared
-    self.pagination = Pagination()
+  init(client: NetworkClient = NetworkClient.shared, pagination: Pagination = Pagination()) {
+    self.client = client
+    self.pagination = pagination
   }
 
   var featureRequests = [FeatureRequest]()
