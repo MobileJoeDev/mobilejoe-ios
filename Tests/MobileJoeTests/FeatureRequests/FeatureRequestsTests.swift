@@ -26,23 +26,21 @@ struct FeatureRequestsTests {
     gateway.allReturnValue = fixtures
   }
 
-  /// Note to the usage of `Task.sleep` here. Setting a `filtering` calls the async `load()` function
-  /// of the subject wrapped in a `Task` call. To wait for the `load()` function to be finished, we have to pause
-  /// the executing to let the results bubble in.
   @Test("Filter feature requests")
   func filterFeatureRequests() async throws {
     try await subject.load()
     #expect(subject.all.count == 3)
 
+    // Instead of relying on the didSet side effect, explicitly reload with the new filter
     subject.filtering = .planned
-    try await Task.sleep(nanoseconds: 1)
+    try await subject.reload()
 
     let featureRequest = try #require(subject.all.first)
     #expect(featureRequest.status == .planned)
     #expect(subject.all.count == 1)
 
     subject.filtering = .all
-    try await Task.sleep(nanoseconds: 1)
+    try await subject.reload()
 
     #expect(subject.all.count == 3)
   }

@@ -10,7 +10,7 @@ import Foundation
 @testable import MobileJoe
 
 struct PaginationTest {
-  @Test func parse() async throws {
+  @Test func `parse pagination from response headers`() async throws {
     let response = try mockURLResponse(headerFields: ["current-page": "2", "total-pages": "4"])
 
     let pagination = Pagination(urlResponse: response)
@@ -21,7 +21,7 @@ struct PaginationTest {
     #expect(pagination.nextPage == 3)
   }
 
-  @Test func parseNoCurrentPage() async throws {
+  @Test func `parse pagination with missing current page`() async throws {
     let response = try mockURLResponse(headerFields: ["total-pages": "4"])
 
     let pagination = Pagination(urlResponse: response)
@@ -32,7 +32,7 @@ struct PaginationTest {
     #expect(pagination.nextPage == 1)
   }
 
-  @Test func parseNoTotalPages() async throws {
+  @Test func `parse pagination with missing total pages`() async throws {
     let response = try mockURLResponse(headerFields: ["current-page": "4"])
 
     let pagination = Pagination(urlResponse: response)

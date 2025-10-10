@@ -16,30 +16,28 @@ import Foundation
 import Testing
 @testable import MobileJoe
 
+@Suite("Remote Feature Request Gateway")
 struct RemoteFeatureRequestGatewayTests {
-  let router: RouterMock
-  let client: NetworkClient
-  var gateway: RemoteFeatureRequestGateway
 
-  init() {
-    router = RouterMock()
-    client = NetworkClient(
-      router: router,
-      debugMode: false,
-      apiKey: "api-key",
-      identity: Identity(externalID: "external-id")
-    )
-    gateway = RemoteFeatureRequestGateway(client: client)
-  }
+  @Suite("Pagination and Loading")
+  struct PaginationAndLoading {
+    let router: RouterMock
+    let client: NetworkClient
+    var gateway: RemoteFeatureRequestGateway
 
-  @Test
-  func `render PDF file`() {
+    init() {
+      router = RouterMock()
+      client = NetworkClient(
+        router: router,
+        debugMode: false,
+        apiKey: "api-key",
+        identity: Identity(externalID: "external-id")
+      )
+      gateway = RemoteFeatureRequestGateway(client: client)
+    }
 
-  }
-
-
-  @Test
-  func `reload resets pagination and replaces results`() async throws {
+    @Test
+    func `reload resets pagination and replaces results`() async throws {
     gateway.featureRequests = [FeatureRequest.fixture(isVoted: false, score: 1)]
 
     router.resultsQueue = [
@@ -63,18 +61,9 @@ struct RemoteFeatureRequestGatewayTests {
 
     #expect(router.performCallCount == 1)
 
-    guard let request = router.lastRequest else {
-      Issue.record("Request not captured")
-      return
-    }
-    guard let requestURL = request.url else {
-      Issue.record("Request missing URL")
-      return
-    }
-    guard let components = URLComponents(url: requestURL, resolvingAgainstBaseURL: false) else {
-      Issue.record("Failed to build URL components")
-      return
-    }
+    let request = try #require(router.lastRequest)
+    let requestURL = try #require(request.url)
+    let components = try #require(URLComponents(url: requestURL, resolvingAgainstBaseURL: false))
     let queryItems = components.queryItems ?? []
     #expect(queryItems.contains(where: { $0.name == "sort" && $0.value == "score" }))
     #expect(queryItems.contains(where: { $0.name == "page" && $0.value == "1" }))
@@ -89,8 +78,8 @@ struct RemoteFeatureRequestGatewayTests {
     #expect(gateway.featureRequests.last?.score == 5)
   }
 
-  @Test
-  func `load appends until pagination ends`() async throws {
+    @Test
+    func `load appends until pagination ends`() async throws {
     router.resultsQueue = [
       (
         try encodeFeatureRequests([
@@ -129,10 +118,28 @@ struct RemoteFeatureRequestGatewayTests {
     try await gateway.load(filterBy: nil, sort: .byNewest, search: nil)
     #expect(router.performCallCount == 2)
     #expect(gateway.featureRequests.count == 2)
+    }
   }
 
-  @Test
-  func `vote replaces feature request`() async throws {
+  @Suite("Voting")
+  struct Voting {
+    let router: RouterMock
+    let client: NetworkClient
+    var gateway: RemoteFeatureRequestGateway
+
+    init() {
+      router = RouterMock()
+      client = NetworkClient(
+        router: router,
+        debugMode: false,
+        apiKey: "api-key",
+        identity: Identity(externalID: "external-id")
+      )
+      gateway = RemoteFeatureRequestGateway(client: client)
+    }
+
+    @Test
+    func `vote replaces feature request`() async throws {
     let original = FeatureRequest.fixture(isVoted: false, score: 2)
     let updated = FeatureRequest(
       id: original.id,
@@ -153,16 +160,15 @@ struct RemoteFeatureRequestGatewayTests {
 
     try await gateway.vote(original)
 
-    guard let request = router.lastRequest else {
-      Issue.record("Request not captured")
-      return
-    }
+    let request = try #require(router.lastRequest)
     #expect(request.httpMethod == "POST")
     #expect(request.url?.path == "/v1/feature_requests/\(original.id)/vote")
     #expect(gateway.featureRequests.first == updated)
+    }
   }
 }
 
+// MARK: - Helpers
 private func encodeFeatureRequests(_ requests: [FeatureRequest]) throws -> Data {
   let encoder = JSONEncoder()
   encoder.dateEncodingStrategy = .formatted(.apiDateFormatter)
@@ -185,7 +191,7 @@ private func makeResponse(path: String, headers: [String: String] = [:]) throws 
   return response
 }
 
-enum RemoteFeatureRequestTestError: Error {
+private enum RemoteFeatureRequestTestError: Error {
   case invalidURL
   case invalidResponse
 }
