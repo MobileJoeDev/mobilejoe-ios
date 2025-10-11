@@ -61,7 +61,7 @@ class FileBasedIdentityGateway: IdentityGateway {
     fileCoordinator.coordinate(writingItemAt: Self.identityURL, options: .forMerging, error: &error) { url in
       do {
         let identityData = try JSONEncoder().encode(identity)
-        try identityData.write(to: url, options: [.atomic])
+        try identityData.write(to: url, options: [.atomic, .noFileProtection])
       } catch {
         logger.error("Joe says: Failed to save identity file. Error: \(error.localizedDescription)")
       }
