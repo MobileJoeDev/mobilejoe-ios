@@ -7,7 +7,7 @@
 //
 //      https://opensource.org/licenses/MIT
 //
-//  AlertsView.swift
+//  AlertView.swift
 //
 //  Created by Florian Mielke on 26.09.25.
 //
