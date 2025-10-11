@@ -28,7 +28,7 @@ class NetworkClient {
 
   static func identify(externalID: String?) async throws {
     shared.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
-    try? await shared.postIdentify()
+    try await shared.postIdentify()
   }
 
   static var isConfigured: Bool {
@@ -57,7 +57,8 @@ extension NetworkClient {
   func postIdentify() async throws {
     let components = try url(for: "identify")
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
-    _ = try urlRequest(for: url, httpMethod: .post)
+    let request = try urlRequest(for: url, httpMethod: .post)
+    _ = try await perform(request)
   }
 }
 
