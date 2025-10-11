@@ -25,22 +25,25 @@ import CryptoKit
 struct Identity: Equatable, Codable {
   let anonymousID: String
   private(set) var externalID: String?
+  private(set) var deviceID: String
 
   init(externalID: String?) {
     anonymousID = "$MBJAnonymousID:\(UUID().compactString)"
+    deviceID = UUID().compactString
     update(externalID: externalID)
   }
 
   mutating func update(externalID: String?) {
-    self.externalID = Self.generateExternalID(from: externalID)
+    self.externalID = Self.hashExternalID(from: externalID)
   }
 }
 
 extension Identity {
   static let anonymousIDPattern = #"\$MBJAnonymousID:([a-z0-9]{32})$"#
   static let externalIDPattern = #"\$MBJExternalID:([a-z0-9]{32})$"#
+  static let deviceIDPattern = #"^[a-z0-9]{32}$"#
 
-  static func generateExternalID(from id: String?) -> String? {
+  static func hashExternalID(from id: String?) -> String? {
     guard let id else { return nil }
     return "$MBJExternalID:\(id.sha256Truncated(length: 32))"
   }

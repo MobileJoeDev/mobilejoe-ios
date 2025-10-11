@@ -122,15 +122,16 @@ extension NetworkClient {
     request.httpMethod = httpMethod.rawValue
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue(SystemInfo.frameworkVersion, forHTTPHeaderField: "Framework-Version")
-    request.setValue(SystemInfo.deviceVersion, forHTTPHeaderField: "Device-Version")
-    request.setValue(SystemInfo.systemOSName, forHTTPHeaderField: "System-OS-Name")
-    request.setValue(SystemInfo.systemOSVersion, forHTTPHeaderField: "System-OS-Version")
+    request.setValue(SystemInfo.deviceModel, forHTTPHeaderField: "Device-Model")
+    request.setValue(SystemInfo.osName, forHTTPHeaderField: "OS-Name")
+    request.setValue(SystemInfo.osVersion, forHTTPHeaderField: "OS-Version")
     request.setValue(SystemInfo.appVersion, forHTTPHeaderField: "App-Version")
-    request.setValue(SystemInfo.buildVersion, forHTTPHeaderField: "App-Build-Version")
+    request.setValue(SystemInfo.appBuildVersion, forHTTPHeaderField: "App-Build-Version")
     request.setValue(SystemInfo.languageCode, forHTTPHeaderField: "Language-Code")
     request.setValue("\(debugMode)", forHTTPHeaderField: "Debug-Mode")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
     request.setValue(identity.anonymousID, forHTTPHeaderField: "Identity-Anonymous-ID")
+    request.setValue(identity.deviceID, forHTTPHeaderField: "Identity-Device-ID")
     if let externalID = identity.externalID {
       request.setValue(externalID, forHTTPHeaderField: "Identity-External-ID")
     }

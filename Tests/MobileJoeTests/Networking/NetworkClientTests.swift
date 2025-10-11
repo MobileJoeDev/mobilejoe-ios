@@ -114,15 +114,16 @@ struct NetworkClientTests {
       #expect(headers["Authorization"] == "Bearer api-key")
       #expect(headers["Content-Type"] == "application/json")
       #expect(headers["Framework-Version"] == SystemInfo.frameworkVersion)
-      #expect(headers["Device-Version"] == SystemInfo.deviceVersion)
-      #expect(headers["System-OS-Name"] == SystemInfo.systemOSName)
-      #expect(headers["System-OS-Version"] == SystemInfo.systemOSVersion)
+      #expect(headers["Device-Model"] == SystemInfo.deviceModel)
+      #expect(headers["OS-Name"] == SystemInfo.osName)
+      #expect(headers["OS-Version"] == SystemInfo.osVersion)
       #expect(headers["App-Version"] == SystemInfo.appVersion)
-      #expect(headers["App-Build-Version"] == SystemInfo.buildVersion)
+      #expect(headers["App-Build-Version"] == SystemInfo.appBuildVersion)
       #expect(headers["Language-Code"] == SystemInfo.languageCode)
       #expect(headers["Debug-Mode"] == "true")
       #expect(headers["Identity-Anonymous-ID"] == identity.anonymousID)
       #expect(headers["Identity-External-ID"] == identity.externalID)
+      #expect(headers["Identity-Device-ID"] == identity.deviceID)
     }
 
     @Test func `throws error when not configured`() async {

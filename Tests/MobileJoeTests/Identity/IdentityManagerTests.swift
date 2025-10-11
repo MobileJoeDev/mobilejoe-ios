@@ -36,7 +36,7 @@ struct IdentityManagerTests {
 
     let identity = try await manager.findOrCreate(by: "external-id")
 
-    #expect(identity.externalID == Identity.generateExternalID(from: "external-id"))
+    #expect(identity.externalID == Identity.hashExternalID(from: "external-id"))
     #expect(gatewayMock.saveIdentityCalledWithIdentity == nil)
   }
 
@@ -45,7 +45,7 @@ struct IdentityManagerTests {
 
     let identity = try await manager.findOrCreate(by: "external-id-2")
 
-    #expect(identity.externalID == Identity.generateExternalID(from: "external-id-2"))
+    #expect(identity.externalID == Identity.hashExternalID(from: "external-id-2"))
     #expect(gatewayMock.saveIdentityCalledWithIdentity == identity)
   }
 }
