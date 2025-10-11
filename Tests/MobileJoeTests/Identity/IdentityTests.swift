@@ -21,6 +21,7 @@ struct IdentityTests {
 
     #expect(isAnonymousID(identity.anonymousID))
     #expect(isExternalID(identity.externalID))
+    #expect(isDeviceID(identity.deviceID))
   }
 
   @Test func `create identity without external ID`() throws {
@@ -28,6 +29,7 @@ struct IdentityTests {
 
     #expect(identity.externalID == nil)
     #expect(isAnonymousID(identity.anonymousID))
+    #expect(isDeviceID(identity.deviceID))
   }
 }
 
@@ -39,5 +41,10 @@ extension IdentityTests {
   private func isExternalID(_ externalID: String?) -> Bool {
     guard let externalID else { return false }
     return (try? Regex(Identity.externalIDPattern).wholeMatch(in: externalID)) != nil
+  }
+
+  private func isDeviceID(_ deviceID: String?) -> Bool {
+    guard let deviceID else { return false }
+    return (try? Regex(Identity.deviceIDPattern).wholeMatch(in: deviceID)) != nil
   }
 }
