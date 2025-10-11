@@ -18,7 +18,8 @@ This project uses Swift Package Manager (SPM) with iOS 17+ deployment target and
 swift build
 
 # Run tests (iOS-only package - use xcodebuild for iOS simulator)
-xcodebuild test -scheme MobileJoe-Package -sdk iphonesimulator18.5 -destination "OS=18.5,name=iPhone 16 Pro"
+# Use any available iOS simulator - check available devices first if needed
+xcodebuild test -scheme MobileJoe-Package -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 16,OS=18.5"
 
 # Clean build artifacts
 swift package clean

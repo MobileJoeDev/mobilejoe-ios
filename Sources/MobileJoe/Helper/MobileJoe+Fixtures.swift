@@ -14,6 +14,60 @@
 
 import Foundation
 
+public class AlertsFixture: Alerts {
+  public static var empty = AlertsFixture()
+
+  public static var multiple: AlertsFixture {
+    let alerts = AlertsFixture()
+    alerts.all = [
+      Alert(
+        id: 1,
+        title: "Critical error.",
+        message: "Please update version.",
+        kind: .error,
+        occurredAt: .distantPast,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      ),
+      Alert(
+        id: 2,
+        title: "Please be patient and stay tuned for further updates. We're working hard.",
+        message: "It wasn't out fault, it was Apple's. That's the way it is. So don't blame us. We might switch to Android in the future to be more flexible and rally free.",
+        kind: .error,
+        occurredAt: .distantPast,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      ),
+      Alert(
+        id: 3,
+        title: "Please be patient and stay tuned for further updates. We're working hard.",
+        message: nil,
+        kind: .warning,
+        occurredAt: .distantPast,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      )
+    ]
+    return alerts
+  }
+
+  public static var one: AlertsFixture {
+    let alerts = AlertsFixture()
+    alerts.all = [
+      Alert(
+        id: 1,
+        title: "Please be patient and stay tuned for further updates. We're working hard.",
+        message: "Please update version.",
+        kind: .error,
+        occurredAt: .distantPast,
+        createdAt: .distantPast,
+        updatedAt: .distantPast
+      )
+    ]
+    return alerts
+  }
+}
+
 public class FeatureRequestsFixture: FeatureRequests {
   public static var empty = FeatureRequestsFixture()
 
@@ -31,7 +85,7 @@ public class FeatureRequestsFixture: FeatureRequests {
         title: "Import holidays from calendar",
         body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",
         score: 10,
-        statusIdentifier: FeatureRequest.Status.open.rawValue,
+        status: .open,
         createdAt: Calendar.utc.date(year: 2025, month: 3, day: 17, hour: 12)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 12)!,
         isVoted: true
@@ -41,7 +95,7 @@ public class FeatureRequestsFixture: FeatureRequests {
         title: "Cloud Sync",
         body: "Sync records and accounts via iCloud on multiple devices.",
         score: 33,
-        statusIdentifier: FeatureRequest.Status.planned.rawValue,
+        status: .planned,
         createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 13)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 18, hour: 13)!,
         isVoted: false
@@ -77,7 +131,7 @@ extension FeatureRequest {
       As there is already a button to return to the current date, I don’t see much of a reason to change the shown date automatically when switching the app. My suggestion is to remove this “feature” or make it optional.
       """,
       score: score,
-      statusIdentifier: Status.inProgress.rawValue,
+      status: .inProgress,
       createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 11)!,
       updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 16, hour: 11)!,
       isVoted: isVoted

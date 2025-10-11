@@ -15,7 +15,6 @@
 import Foundation
 import Observation
 
-@MainActor
 @Observable
 public class FeatureRequests {
   public var all = [FeatureRequest]()
@@ -59,14 +58,14 @@ public class FeatureRequests {
   }
 
   private var search: String = ""
-  nonisolated(unsafe) private var searchDebounceTask: Task<Void, Never>? = nil
+  private var searchDebounceTask: Task<Void, Never>? = nil
   private let gateway: FeatureRequestGateway
 
   public init(gateway: FeatureRequestGateway? = nil) {
     self.gateway = gateway ?? RemoteFeatureRequestGateway.shared
   }
 
-  deinit {
+  @MainActor deinit {
     searchDebounceTask?.cancel()
   }
 

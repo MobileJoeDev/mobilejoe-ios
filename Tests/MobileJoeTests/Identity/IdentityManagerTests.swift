@@ -15,7 +15,6 @@
 import Testing
 @testable import MobileJoe
 
-@MainActor
 struct IdentityManagerTests {
   let manager: IdentityManager
   let gatewayMock: IdentityGatewayMock
@@ -25,14 +24,14 @@ struct IdentityManagerTests {
     manager = IdentityManager(gateway: gatewayMock)
   }
 
-  @Test func findOrCreate_noIdentityPresent() async throws {
+  @Test func `find or create identity when none present`() async throws {
     let identity = try await manager.findOrCreate(by: nil)
 
     #expect(identity.externalID == nil)
     #expect(gatewayMock.saveIdentityCalledWithIdentity == identity)
   }
 
-  @Test func findOrCreate_findsExistingIdentity() async throws {
+  @Test func `find or create identity finds existing identity`() async throws {
     gatewayMock.findReturnValue = Identity(externalID: "external-id")
 
     let identity = try await manager.findOrCreate(by: "external-id")
@@ -41,7 +40,7 @@ struct IdentityManagerTests {
     #expect(gatewayMock.saveIdentityCalledWithIdentity == nil)
   }
 
-  @Test func findOrCreate_updatesExistingIdentity() async throws {
+  @Test func `find or create identity updates existing identity`() async throws {
     gatewayMock.findReturnValue = Identity(externalID: "external-id")
 
     let identity = try await manager.findOrCreate(by: "external-id-2")

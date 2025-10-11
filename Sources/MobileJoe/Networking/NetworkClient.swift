@@ -15,19 +15,20 @@
 import Foundation
 import OSLog
 
-@MainActor
 class NetworkClient {
   static let shared = NetworkClient()
 
   @discardableResult
-  static func configure(withAPIKey apiKey: String, externalID: String?) async throws -> NetworkClient {
+  static func configure(withAPIKey apiKey: String, externalID: String?, debugMode: Bool = false) async throws -> NetworkClient {
     shared.apiKey = apiKey
+    shared.debugMode = debugMode
     try await NetworkClient.identify(externalID: externalID)
     return shared
   }
 
   static func identify(externalID: String?) async throws {
     shared.identity = try await IdentityManager.shared.findOrCreate(by: externalID)
+    try? await shared.postIdentify()
   }
 
   static var isConfigured: Bool {
@@ -37,13 +38,26 @@ class NetworkClient {
   private static let serverHostURL = URL(string: "https://mbj-api.com")!
   private static let apiVersion = "v1"
 
-  private var apiKey: String = ""
+  private var debugMode: Bool
+  private var apiKey: String
   private var identity: Identity?
   private let router: Router
   private let logger: Logger = Logger(subsystem: "MobileJoe", category: "NetworkClient")
 
-  init(router: Router = DefaultRouter()) {
+  init(router: Router = DefaultRouter(), debugMode: Bool = false, apiKey: String = "", identity: Identity? = nil) {
     self.router = router
+    self.debugMode = debugMode
+    self.apiKey = apiKey
+    self.identity = identity
+  }
+}
+
+// MARK: - Identify
+extension NetworkClient {
+  func postIdentify() async throws {
+    let components = try url(for: "identify")
+    guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
+    _ = try urlRequest(for: url, httpMethod: .post)
   }
 }
 
@@ -84,10 +98,21 @@ extension NetworkClient {
   }
 }
 
+// MARK: - Alerts
+extension NetworkClient {
+  func getAlerts() async throws -> Data {
+    let components = try url(for: "alerts")
+    guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
+    let request = try urlRequest(for: url, httpMethod: .get)
+    let result = try await perform(request)
+    return result.data
+  }
+}
+
 // MARK: - Helper
 extension NetworkClient {
   private func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse) {
-    guard NetworkClient.isConfigured else { throw MobileJoeError.notConfigured }
+    guard apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
     return try await router.perform(request)
   }
 
@@ -98,9 +123,12 @@ extension NetworkClient {
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue(SystemInfo.frameworkVersion, forHTTPHeaderField: "Framework-Version")
     request.setValue(SystemInfo.deviceVersion, forHTTPHeaderField: "Device-Version")
-    request.setValue(SystemInfo.systemVersion, forHTTPHeaderField: "System-OS-Version")
+    request.setValue(SystemInfo.systemOSName, forHTTPHeaderField: "System-OS-Name")
+    request.setValue(SystemInfo.systemOSVersion, forHTTPHeaderField: "System-OS-Version")
     request.setValue(SystemInfo.appVersion, forHTTPHeaderField: "App-Version")
     request.setValue(SystemInfo.buildVersion, forHTTPHeaderField: "App-Build-Version")
+    request.setValue(SystemInfo.languageCode, forHTTPHeaderField: "Language-Code")
+    request.setValue("\(debugMode)", forHTTPHeaderField: "Debug-Mode")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
     request.setValue(identity.anonymousID, forHTTPHeaderField: "Identity-Anonymous-ID")
     if let externalID = identity.externalID {

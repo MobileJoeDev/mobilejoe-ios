@@ -16,10 +16,12 @@ import Foundation
 
 struct SystemInfo {
   static let frameworkVersion = "1.0.0"
-  static let systemVersion = ProcessInfo.processInfo.operatingSystemVersionString
+  static let systemOSName = "iOS"
+  static let systemOSVersion = ProcessInfo.processInfo.operatingSystemVersion.apiDescription
   static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
   static let buildVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
-  
+  static let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
+
   static var deviceVersion: String {
     var systemInfo = utsname()
     uname(&systemInfo)
@@ -31,5 +33,11 @@ struct SystemInfo {
     }
     
     return identifier
+  }
+}
+
+extension OperatingSystemVersion {
+  fileprivate var apiDescription: String {
+    "\(majorVersion).\(minorVersion).\(patchVersion)"
   }
 }

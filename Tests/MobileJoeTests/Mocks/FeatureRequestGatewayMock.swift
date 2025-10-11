@@ -23,7 +23,20 @@ class FeatureRequestGatewayMock: FeatureRequestGateway {
     container
   }
 
+  // Tracking properties for tests
+  var lastSearch: String?
+  var lastSorting: FeatureRequest.Sorting?
+  var lastStatuses: [FeatureRequest.Status]?
+  var reloadCallCount = 0
+  var loadCallCount = 0
+  var voteCallCount = 0
+
   func load(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws {
+    loadCallCount += 1
+    lastSearch = search
+    lastSorting = sort
+    lastStatuses = statuses
+
     container = allReturnValue
       .filter { fr in
         guard let statuses else { return true }
@@ -32,6 +45,11 @@ class FeatureRequestGatewayMock: FeatureRequestGateway {
   }
 
   func reload(filterBy statuses: [FeatureRequest.Status]?, sort: FeatureRequest.Sorting, search: String?) async throws {
+    reloadCallCount += 1
+    lastSearch = search
+    lastSorting = sort
+    lastStatuses = statuses
+
     container = allReturnValue
       .filter { fr in
         guard let statuses else { return true }
@@ -40,6 +58,6 @@ class FeatureRequestGatewayMock: FeatureRequestGateway {
   }
 
   func vote(_ featureRequest: FeatureRequest) async throws {
-
+    voteCallCount += 1
   }
 }

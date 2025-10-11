@@ -9,14 +9,13 @@
 //
 //  FeatureRequestsTests.swift
 //
-//  Created by Florian on 02.07.25.
+//  Created by Florian Mielke on 02.07.25.
 //
 
 import Foundation
 import Testing
 @testable import MobileJoe
 
-@MainActor
 struct FeatureRequestsTests {
   let gateway: FeatureRequestGatewayMock
   let subject: FeatureRequests
@@ -27,24 +26,110 @@ struct FeatureRequestsTests {
     gateway.allReturnValue = fixtures
   }
 
-  /// Note to the usage of `Task.sleep` here. Setting a `filtering` calls the async `load()` function
-  /// of the subject wrapped in a `Task` call. To wait for the `load()` function to be finished, we have to pause
-  /// the executing to let the results bubble in.
-  @Test("Filter feature requests")
-  func filterFeatureRequests() async throws {
+  @Test func `filter feature requests`() async throws {
     try await subject.load()
     #expect(subject.all.count == 3)
 
+    // Instead of relying on the didSet side effect, explicitly reload with the new filter
     subject.filtering = .planned
-    try await Task.sleep(nanoseconds: 1)
+    try await subject.reload()
 
     let featureRequest = try #require(subject.all.first)
     #expect(featureRequest.status == .planned)
     #expect(subject.all.count == 1)
 
     subject.filtering = .all
-    try await Task.sleep(nanoseconds: 1)
+    try await subject.reload()
 
+    #expect(subject.all.count == 3)
+  }
+
+  @Test func `sort feature requests by score`() async throws {
+    try await subject.load()
+    #expect(subject.all.count == 3)
+
+    subject.sorting = .byScore
+    try await subject.reload()
+
+    #expect(subject.all.count == 3)
+    #expect(gateway.lastSorting == .byScore)
+  }
+
+  @Test func `sort feature requests by newest`() async throws {
+    try await subject.load()
+
+    subject.sorting = .byNewest
+    try await subject.reload()
+
+    #expect(gateway.lastSorting == .byNewest)
+  }
+
+  @Test func `search triggers reload after debounce`() async throws {
+    try await subject.load()
+    #expect(subject.all.count == 3)
+
+    try await subject.search(for: "Cloud")
+
+    // Wait for debounce (0.35s) + buffer
+    try await Task.sleep(for: .milliseconds(400))
+
+    #expect(gateway.lastSearch == "Cloud")
+    #expect(gateway.reloadCallCount >= 1)
+  }
+
+  @Test func `rapid search queries cancel previous searches`() async throws {
+    try await subject.load()
+    gateway.reloadCallCount = 0
+
+    try await subject.search(for: "First")
+    try await Task.sleep(for: .milliseconds(100))
+
+    try await subject.search(for: "Second")
+    try await Task.sleep(for: .milliseconds(100))
+
+    try await subject.search(for: "Final")
+
+    // Wait for debounce
+    try await Task.sleep(for: .milliseconds(400))
+
+    // Should only reload once with final search term
+    #expect(gateway.lastSearch == "Final")
+    #expect(gateway.reloadCallCount == 1)
+  }
+
+  @Test func `empty search string is handled`() async throws {
+    try await subject.load()
+
+    try await subject.search(for: "")
+    try await Task.sleep(for: .milliseconds(400))
+
+    #expect(gateway.lastSearch == "")
+  }
+
+  @Test func `duplicate search does not trigger reload`() async throws {
+    try await subject.load()
+    gateway.reloadCallCount = 0
+
+    try await subject.search(for: "Cloud")
+    try await Task.sleep(for: .milliseconds(400))
+
+    let firstCallCount = gateway.reloadCallCount
+
+    // Same search again
+    try await subject.search(for: "Cloud")
+    try await Task.sleep(for: .milliseconds(400))
+
+    // Should not trigger another reload
+    #expect(gateway.reloadCallCount == firstCallCount)
+  }
+
+  @Test func `vote updates local feature requests`() async throws {
+    try await subject.load()
+    let original = try #require(subject.all.first)
+
+    try await subject.vote(original)
+
+    #expect(gateway.voteCallCount == 1)
     #expect(subject.all.count == 3)
   }
 }
@@ -57,7 +142,7 @@ extension FeatureRequestsTests {
         title: "Import holidays from calendar",
         body: "Choose an iOS calendar to automatically import and sync holidays in WorkTimes.",
         score: 10,
-        statusIdentifier: FeatureRequest.Status.open.rawValue,
+        status: .open,
         createdAt: Calendar.utc.date(year: 2025, month: 3, day: 17, hour: 12)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 12)!,
         isVoted: true
@@ -67,7 +152,7 @@ extension FeatureRequestsTests {
         title: "Cloud Sync",
         body: "Sync records and accounts via iCloud on multiple devices.",
         score: 33,
-        statusIdentifier: FeatureRequest.Status.planned.rawValue,
+        status: .planned,
         createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 13)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 18, hour: 13)!,
         isVoted: false
@@ -81,7 +166,7 @@ extension FeatureRequestsTests {
         As there is already a button to return to the current date, I don’t see much of a reason to change the shown date automatically when switching the app. My suggestion is to remove this “feature” or make it optional.
         """,
         score: 10,
-        statusIdentifier: FeatureRequest.Status.inProgress.rawValue,
+        status: .inProgress,
         createdAt: Calendar.utc.date(year: 2025, month: 3, day: 15, hour: 11)!,
         updatedAt: Calendar.utc.date(year: 2025, month: 3, day: 16, hour: 11)!,
         isVoted: true

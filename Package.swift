@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -22,11 +22,11 @@ let package = Package(
   targets: [
     .target(
       name: "MobileJoe",
-      path: "Sources"
+      path: "Sources",
     ),
     .testTarget(
       name: "MobileJoeTests",
-      dependencies: ["MobileJoe"]
+      dependencies: ["MobileJoe"],
     ),
     .target(
       name: "MobileJoeUI",
@@ -38,3 +38,13 @@ let package = Package(
     ),
   ]
 )
+
+for target in package.targets {
+  var settings = target.swiftSettings ?? []
+  settings.append(contentsOf: [
+    .defaultIsolation(MainActor.self),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+    .enableUpcomingFeature("InferIsolatedConformances")
+  ])
+  target.swiftSettings = settings
+}

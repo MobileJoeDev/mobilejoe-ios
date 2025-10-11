@@ -15,14 +15,12 @@
 import Foundation
 import OSLog
 
-@MainActor
 protocol IdentityGateway {
   func find() async throws -> Identity?
   func save(identity: Identity) async throws
   func delete() async throws
 }
 
-@MainActor
 class FileBasedIdentityGateway: IdentityGateway {
   static let shared = FileBasedIdentityGateway()
 

@@ -34,6 +34,12 @@ struct Pagination: Equatable {
     self.totalCount = 1
   }
 
+  init(currentPage: Int, totalPages: Int, totalCount: Int) {
+    self.currentPage = currentPage
+    self.totalPages = totalPages
+    self.totalCount = totalCount
+  }
+
   init(urlResponse: HTTPURLResponse) {
     self.totalPages = Pagination.value(for: "total-pages", from: urlResponse) ?? 1
     self.currentPage = Pagination.value(for: "current-page", from: urlResponse) ?? 0

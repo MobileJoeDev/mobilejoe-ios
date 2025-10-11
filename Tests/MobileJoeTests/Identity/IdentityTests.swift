@@ -16,14 +16,14 @@ import Testing
 @testable import MobileJoe
 
 struct IdentityTests {
-  @Test func create_withExternalID() throws {
+  @Test func `create identity with external ID`() throws {
     let identity = Identity(externalID: "external-id")
 
     #expect(isAnonymousID(identity.anonymousID))
     #expect(isExternalID(identity.externalID))
   }
 
-  @Test func create_withoutExternalID() throws {
+  @Test func `create identity without external ID`() throws {
     let identity = Identity(externalID: nil)
 
     #expect(identity.externalID == nil)
