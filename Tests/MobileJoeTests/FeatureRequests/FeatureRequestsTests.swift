@@ -9,7 +9,7 @@
 //
 //  FeatureRequestsTests.swift
 //
-//  Created by Florian on 02.07.25.
+//  Created by Florian Mielke on 02.07.25.
 //
 
 import Foundation
@@ -26,8 +26,7 @@ struct FeatureRequestsTests {
     gateway.allReturnValue = fixtures
   }
 
-  @Test("Filter feature requests")
-  func filterFeatureRequests() async throws {
+  @Test func `filter feature requests`() async throws {
     try await subject.load()
     #expect(subject.all.count == 3)
 
@@ -42,6 +41,95 @@ struct FeatureRequestsTests {
     subject.filtering = .all
     try await subject.reload()
 
+    #expect(subject.all.count == 3)
+  }
+
+  @Test func `sort feature requests by score`() async throws {
+    try await subject.load()
+    #expect(subject.all.count == 3)
+
+    subject.sorting = .byScore
+    try await subject.reload()
+
+    #expect(subject.all.count == 3)
+    #expect(gateway.lastSorting == .byScore)
+  }
+
+  @Test func `sort feature requests by newest`() async throws {
+    try await subject.load()
+
+    subject.sorting = .byNewest
+    try await subject.reload()
+
+    #expect(gateway.lastSorting == .byNewest)
+  }
+
+  @Test func `search triggers reload after debounce`() async throws {
+    try await subject.load()
+    #expect(subject.all.count == 3)
+
+    try await subject.search(for: "Cloud")
+
+    // Wait for debounce (0.35s) + buffer
+    try await Task.sleep(for: .milliseconds(400))
+
+    #expect(gateway.lastSearch == "Cloud")
+    #expect(gateway.reloadCallCount >= 1)
+  }
+
+  @Test func `rapid search queries cancel previous searches`() async throws {
+    try await subject.load()
+    gateway.reloadCallCount = 0
+
+    try await subject.search(for: "First")
+    try await Task.sleep(for: .milliseconds(100))
+
+    try await subject.search(for: "Second")
+    try await Task.sleep(for: .milliseconds(100))
+
+    try await subject.search(for: "Final")
+
+    // Wait for debounce
+    try await Task.sleep(for: .milliseconds(400))
+
+    // Should only reload once with final search term
+    #expect(gateway.lastSearch == "Final")
+    #expect(gateway.reloadCallCount == 1)
+  }
+
+  @Test func `empty search string is handled`() async throws {
+    try await subject.load()
+
+    try await subject.search(for: "")
+    try await Task.sleep(for: .milliseconds(400))
+
+    #expect(gateway.lastSearch == "")
+  }
+
+  @Test func `duplicate search does not trigger reload`() async throws {
+    try await subject.load()
+    gateway.reloadCallCount = 0
+
+    try await subject.search(for: "Cloud")
+    try await Task.sleep(for: .milliseconds(400))
+
+    let firstCallCount = gateway.reloadCallCount
+
+    // Same search again
+    try await subject.search(for: "Cloud")
+    try await Task.sleep(for: .milliseconds(400))
+
+    // Should not trigger another reload
+    #expect(gateway.reloadCallCount == firstCallCount)
+  }
+
+  @Test func `vote updates local feature requests`() async throws {
+    try await subject.load()
+    let original = try #require(subject.all.first)
+
+    try await subject.vote(original)
+
+    #expect(gateway.voteCallCount == 1)
     #expect(subject.all.count == 3)
   }
 }

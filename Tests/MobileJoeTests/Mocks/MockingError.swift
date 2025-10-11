@@ -9,7 +9,7 @@
 //
 //  MockingError.swift
 //
-//  Created by Florian on 02.07.25.
+//  Created by Florian Mielke on 02.07.25.
 //
 
 import Foundation

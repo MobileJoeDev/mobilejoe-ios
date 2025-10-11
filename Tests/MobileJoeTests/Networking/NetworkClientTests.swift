@@ -153,19 +153,74 @@ struct NetworkClientTests {
       }
     }
   }
+
+  @Suite("HTTP Error Responses")
+  struct HTTPErrorResponses {
+    let router: RouterMock
+    let identity: Identity
+    let client: NetworkClient
+
+    init() {
+      router = RouterMock()
+      identity = Identity(externalID: "external-id")
+      client = NetworkClient(
+        router: router,
+        debugMode: false,
+        apiKey: "api-key",
+        identity: identity
+      )
+    }
+
+    @Test(arguments: [400, 401, 403, 404, 429, 500, 503])
+    func `handles HTTP error status codes`(statusCode: Int) async throws {
+      router.nextResult = (Data("{}".utf8), try makeResponse(path: "/v1/feature_requests", statusCode: statusCode))
+
+      let error = await #expect(throws: MobileJoeError.self) {
+        _ = try await client.getFeatureRequests(filterBy: nil, sort: .byNewest, search: nil, page: 1)
+      }
+
+      guard case .notOkURLResponse = error else {
+        Issue.record("Expected .notOkURLResponse error, got \(error)")
+        return
+      }
+    }
+
+    @Test func `returns raw data without decoding`() async throws {
+      // NetworkClient doesn't decode JSON, it just returns raw data
+      let invalidJSON = Data("invalid json{".utf8)
+      router.nextResult = (invalidJSON, try makeResponse(path: "/v1/feature_requests"))
+
+      let (data, _) = try await client.getFeatureRequests(filterBy: nil, sort: .byNewest, search: nil, page: 1)
+      #expect(data == invalidJSON)
+    }
+
+    @Test func `handles empty response body`() async throws {
+      router.nextResult = (Data(), try makeResponse(path: "/v1/feature_requests"))
+
+      let (data, _) = try await client.getFeatureRequests(filterBy: nil, sort: .byNewest, search: nil, page: 1)
+      #expect(data.isEmpty)
+    }
+  }
 }
 
 // MARK: - Helpers
 extension NetworkClientTests.FeatureRequestEndpoints {
-  private func makeResponse(path: String, headers: [String: String] = [:]) throws -> HTTPURLResponse {
+  private func makeResponse(path: String, statusCode: Int = 200, headers: [String: String] = [:]) throws -> HTTPURLResponse {
     let url = try #require(URL(string: "https://mbj-api.com\(path)"))
-    return try #require(HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: headers))
+    return try #require(HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headers))
   }
 }
 
 extension NetworkClientTests.ConfigurationAndErrors {
-  private func makeResponse(path: String, headers: [String: String] = [:]) throws -> HTTPURLResponse {
+  private func makeResponse(path: String, statusCode: Int = 200, headers: [String: String] = [:]) throws -> HTTPURLResponse {
     let url = try #require(URL(string: "https://mbj-api.com\(path)"))
-    return try #require(HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: headers))
+    return try #require(HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headers))
+  }
+}
+
+extension NetworkClientTests.HTTPErrorResponses {
+  private func makeResponse(path: String, statusCode: Int = 200, headers: [String: String] = [:]) throws -> HTTPURLResponse {
+    let url = try #require(URL(string: "https://mbj-api.com\(path)"))
+    return try #require(HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headers))
   }
 }

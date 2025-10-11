@@ -9,7 +9,7 @@
 //
 //  RouterMock.swift
 //
-//  Created by Florian on 10.10.25.
+//  Created by Florian Mielke on 10.10.25.
 //
 
 import Foundation
@@ -31,20 +31,26 @@ class RouterMock: Router {
     performCallCount += 1
     lastRequest = request
     requests.append(request)
-    
+
     if let error = nextError {
       nextError = nil
       throw error
     }
-    
+
+    let result: (data: Data, response: HTTPURLResponse)
     if resultsQueue.isNotEmpty {
-      return resultsQueue.removeFirst()
+      result = resultsQueue.removeFirst()
+    } else if let nextResult {
+      result = nextResult
+    } else {
+      throw Error.missingResult
     }
-    
-    if let nextResult {
-      return nextResult
+
+    // Check if response is OK, just like DefaultRouter does
+    guard result.response.isOK else {
+      throw MobileJoeError.notOkURLResponse(description: result.response.description)
     }
-    
-    throw Error.missingResult
+
+    return result
   }
 }
