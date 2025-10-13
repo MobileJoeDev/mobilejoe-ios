@@ -29,7 +29,7 @@ struct Identity: Equatable, Codable {
 
   init(externalID: String?) {
     anonymousID = "$MBJAnonymousID:\(UUID().compactString)"
-    deviceID = UUID().compactString
+    deviceID = "$MBJDeviceID:\(UUID().compactString)"
     update(externalID: externalID)
   }
 
@@ -41,7 +41,7 @@ struct Identity: Equatable, Codable {
 extension Identity {
   static let anonymousIDPattern = #"\$MBJAnonymousID:([a-z0-9]{32})$"#
   static let externalIDPattern = #"\$MBJExternalID:([a-z0-9]{32})$"#
-  static let deviceIDPattern = #"^[a-z0-9]{32}$"#
+  static let deviceIDPattern = #"\$MBJDeviceID:([a-z0-9]{32})$"#
 
   static func hashExternalID(from id: String?) -> String? {
     guard let id else { return nil }
