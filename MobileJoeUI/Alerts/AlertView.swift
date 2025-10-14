@@ -47,6 +47,10 @@ public struct AlertView: View {
       }
     }
   }
+
+  public init(alert: MobileJoe.Alert) {
+    self.alert = alert
+  }
 }
 
 extension AlertView {

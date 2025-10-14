@@ -29,6 +29,10 @@ public struct AlertsStackView: View {
       try? await alerts.load()
     }
   }
+
+  public init(alerts: Alerts) {
+    self.alerts = alerts
+  }
 }
 
 #Preview {
