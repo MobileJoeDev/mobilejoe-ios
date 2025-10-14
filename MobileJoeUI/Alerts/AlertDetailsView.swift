@@ -15,12 +15,12 @@
 import SwiftUI
 import MobileJoe
 
-struct AlertDetailsView: View {
+public struct AlertDetailsView: View {
   let alert: MobileJoe.Alert
 
   @Environment(\.dismiss) private var dismiss
 
-  var body: some View {
+  public var body: some View {
     List {
       Section(footer: Footer()) {
         VStack(spacing: 16) {

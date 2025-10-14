@@ -15,12 +15,12 @@
 import SwiftUI
 import MobileJoe
 
-struct AlertView: View {
+public struct AlertView: View {
   let alert: MobileJoe.Alert
 
   @State private var showingDetails = false
 
-  var body: some View {
+  public var body: some View {
     Button(action: toggleShowingDetails) {
       HStack {
         HStack(alignment: .firstTextBaseline, spacing: 10) {

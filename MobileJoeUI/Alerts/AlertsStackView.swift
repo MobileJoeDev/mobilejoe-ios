@@ -15,10 +15,10 @@
 import SwiftUI
 import MobileJoe
 
-struct AlertsStackView: View {
+public struct AlertsStackView: View {
   @State var alerts: Alerts
 
-  var body: some View {
+  public var body: some View {
     VStack {
       ForEach(alerts.all) { alert in
         AlertView(alert: alert)

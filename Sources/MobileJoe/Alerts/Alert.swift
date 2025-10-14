@@ -33,6 +33,16 @@ public struct Alert: Identifiable, Hashable, Codable {
     case updatedAt = "updated_at"
   }
 
+  public init(id: Int, title: String, message: String?, kind: Kind, occurredAt: Date, createdAt: Date, updatedAt: Date) {
+    self.id = id
+    self.title = title
+    self.message = message
+    self.kind = kind
+    self.occurredAt = occurredAt
+    self.createdAt = createdAt
+    self.updatedAt = updatedAt
+  }
+
   public func hash(into hasher: inout Hasher) {
     hasher.combine(id)
   }
