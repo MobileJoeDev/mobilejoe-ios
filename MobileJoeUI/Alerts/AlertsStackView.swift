@@ -22,7 +22,7 @@ public struct AlertsStackView: View {
     VStack {
       ForEach(alerts.all) { alert in
         AlertView(alert: alert)
-          .clipShape(.containerRelative)
+          .clipShape(.capsule)
       }
     }
     .task {
@@ -30,7 +30,11 @@ public struct AlertsStackView: View {
     }
   }
 
-  public init(alerts: Alerts) {
+  public init() {
+    self.init(alerts: Alerts())
+  }
+
+  init(alerts: Alerts) {
     self.alerts = alerts
   }
 }
