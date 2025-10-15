@@ -24,8 +24,8 @@ public struct AlertView: View {
     Button(action: toggleShowingDetails) {
       HStack {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
-          Image(systemName: "exclamationmark.triangle")
-            .fontWeight(.bold)
+          Image(systemName: "exclamationmark.triangle.fill")
+            .foregroundStyle(alert.secondaryColor)
           Text(alert.title)
             .multilineTextAlignment(.leading)
         }
@@ -36,7 +36,7 @@ public struct AlertView: View {
       .font(.subheadline)
       .foregroundStyle(alert.foregroundColor)
       .padding(12)
-      .padding(.horizontal, 14)
+      .padding(.horizontal, 8)
       .frame(maxWidth: .infinity, alignment: .leading)
       .background(alert.backgroundColor)
     }

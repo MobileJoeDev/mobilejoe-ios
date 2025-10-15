@@ -54,7 +54,6 @@ public struct Alert: Identifiable, Hashable, Codable {
 
 extension Alert {
   public enum Kind: String, Codable {
-    case info
     case warning
     case error
   }

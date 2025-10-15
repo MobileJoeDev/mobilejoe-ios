@@ -18,7 +18,6 @@ import MobileJoe
 extension MobileJoe.Alert {
   var backgroundColor: Color {
     switch kind {
-    case .info: .warning
     case .warning: .warning
     case .error: .destructive
     }
@@ -26,9 +25,15 @@ extension MobileJoe.Alert {
 
   var foregroundColor: Color {
     switch kind {
-    case .info: .black
     case .warning: .black
     case .error: .white
+    }
+  }
+
+  var secondaryColor: Color {
+    switch kind {
+    case .warning: .warningSecondary
+    case .error: .destructiveSecondary
     }
   }
 }
