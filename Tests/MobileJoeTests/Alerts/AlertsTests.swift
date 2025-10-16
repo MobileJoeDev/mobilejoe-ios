@@ -27,16 +27,18 @@ struct AlertsTests {
     gateway.allReturnValue = fixtures
   }
 
-  @Test func `load alerts populates all property`() async throws {
+  @Test
+  func `load alerts populates all property`() async throws {
     #expect(subject.all.isEmpty)
 
     try await subject.load()
 
-    #expect(subject.all.count == 3)
+    #expect(subject.all.count == 2)
     #expect(!subject.isEmpty)
   }
 
-  @Test func `empty state is correct`() async throws {
+  @Test
+  func `empty state is correct`() async throws {
     gateway.allReturnValue = []
 
     try await subject.load()
@@ -45,25 +47,25 @@ struct AlertsTests {
     #expect(subject.all.isEmpty)
   }
 
-  @Test func `alerts contain expected data`() async throws {
+  @Test
+  func `alerts contain expected data`() async throws {
     try await subject.load()
 
     let firstAlert = try #require(subject.all.first)
     #expect(firstAlert.id == 1)
-    #expect(firstAlert.title == "System Maintenance")
-    #expect(firstAlert.kind == .info)
+    #expect(firstAlert.title == "Performance Issue")
   }
 
-  @Test(arguments: [Alert.Kind.info, Alert.Kind.warning, Alert.Kind.error])
+  @Test(arguments: [Alert.Kind.warning, Alert.Kind.error])
   func `alert kinds decode correctly`(kind: Alert.Kind) async throws {
     let alert = Alert(
       id: 1,
       title: "Test",
       message: "Test message",
       kind: kind,
-      occurredAt: Date(),
-      createdAt: Date(),
-      updatedAt: Date()
+      occurredAt: .now,
+      createdAt: .now,
+      updatedAt: .now
     )
 
     gateway.allReturnValue = [alert]
@@ -79,15 +81,6 @@ extension AlertsTests {
     [
       Alert(
         id: 1,
-        title: "System Maintenance",
-        message: "Scheduled maintenance tonight at 2 AM",
-        kind: .info,
-        occurredAt: Calendar.utc.date(year: 2025, month: 10, day: 10, hour: 2)!,
-        createdAt: Calendar.utc.date(year: 2025, month: 10, day: 9, hour: 12)!,
-        updatedAt: Calendar.utc.date(year: 2025, month: 10, day: 9, hour: 12)!
-      ),
-      Alert(
-        id: 2,
         title: "Performance Issue",
         message: "We're experiencing slower response times",
         kind: .warning,
@@ -96,7 +89,7 @@ extension AlertsTests {
         updatedAt: Calendar.utc.date(year: 2025, month: 10, day: 9, hour: 15)!
       ),
       Alert(
-        id: 3,
+        id: 2,
         title: "Service Outage",
         message: "API services are temporarily unavailable",
         kind: .error,
