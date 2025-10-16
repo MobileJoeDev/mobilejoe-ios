@@ -30,7 +30,7 @@ struct NetworkClientTests {
       identity = Identity(externalID: "external-id")
       client = NetworkClient(
         router: router,
-        debugMode: true,
+        isDebugMode: true,
         apiKey: "api-key",
         identity: identity
       )
@@ -94,7 +94,7 @@ struct NetworkClientTests {
       identity = Identity(externalID: "external-id")
       client = NetworkClient(
         router: router,
-        debugMode: true,
+        isDebugMode: true,
         apiKey: "api-key",
         identity: identity
       )
@@ -128,7 +128,7 @@ struct NetworkClientTests {
 
     @Test func `throws error when not configured`() async {
       let router = RouterMock()
-      let client = NetworkClient(router: router, debugMode: false, apiKey: "", identity: identity)
+      let client = NetworkClient(router: router, isDebugMode: false, apiKey: "", identity: identity)
 
       let error = await #expect(throws: MobileJoeError.self) {
         try await client.getAlerts()
@@ -142,7 +142,7 @@ struct NetworkClientTests {
 
     @Test func `throws error when identity is missing`() async throws {
       let router = RouterMock()
-      let client = NetworkClient(router: router, debugMode: false, apiKey: "api-key", identity: nil)
+      let client = NetworkClient(router: router, isDebugMode: false, apiKey: "api-key", identity: nil)
       router.nextResult = (Data("[]".utf8), try makeResponse(path: "/v1/alerts"))
 
       let error = await #expect(throws: MobileJoeError.self) {
@@ -166,7 +166,7 @@ struct NetworkClientTests {
       identity = Identity(externalID: "external-id")
       client = NetworkClient(
         router: router,
-        debugMode: false,
+        isDebugMode: false,
         apiKey: "api-key",
         identity: identity
       )

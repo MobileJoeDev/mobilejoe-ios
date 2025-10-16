@@ -29,7 +29,7 @@ struct RemoteFeatureRequestGatewayTests {
       router = RouterMock()
       client = NetworkClient(
         router: router,
-        debugMode: false,
+        isDebugMode: false,
         apiKey: "api-key",
         identity: Identity(externalID: "external-id")
       )
@@ -131,7 +131,7 @@ struct RemoteFeatureRequestGatewayTests {
       router = RouterMock()
       client = NetworkClient(
         router: router,
-        debugMode: false,
+        isDebugMode: false,
         apiKey: "api-key",
         identity: Identity(externalID: "external-id")
       )

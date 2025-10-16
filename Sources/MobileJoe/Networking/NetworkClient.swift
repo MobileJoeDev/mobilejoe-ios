@@ -21,7 +21,7 @@ class NetworkClient {
   @discardableResult
   static func configure(withAPIKey apiKey: String, externalID: String?, debugMode: Bool = false) async throws -> NetworkClient {
     shared.apiKey = apiKey
-    shared.debugMode = debugMode
+    shared.isDebugMode = debugMode
     try await NetworkClient.identify(externalID: externalID)
     return shared
   }
@@ -38,15 +38,15 @@ class NetworkClient {
   private static let serverHostURL = URL(string: "https://mbj-api.com")!
   private static let apiVersion = "v1"
 
-  private var debugMode: Bool
+  private var isDebugMode: Bool
   private var apiKey: String
   private var identity: Identity?
   private let router: Router
   private let logger: Logger = Logger(subsystem: "MobileJoe", category: "NetworkClient")
 
-  init(router: Router = DefaultRouter(), debugMode: Bool = false, apiKey: String = "", identity: Identity? = nil) {
+  init(router: Router = DefaultRouter(), isDebugMode: Bool = false, apiKey: String = "", identity: Identity? = nil) {
     self.router = router
-    self.debugMode = debugMode
+    self.isDebugMode = isDebugMode
     self.apiKey = apiKey
     self.identity = identity
   }
@@ -129,7 +129,7 @@ extension NetworkClient {
     request.setValue(SystemInfo.appVersion, forHTTPHeaderField: "App-Version")
     request.setValue(SystemInfo.appBuildVersion, forHTTPHeaderField: "App-Build-Version")
     request.setValue(SystemInfo.languageCode, forHTTPHeaderField: "Language-Code")
-    request.setValue("\(debugMode)", forHTTPHeaderField: "Debug-Mode")
+    request.setValue("\(isDebugMode)", forHTTPHeaderField: "Debug-Mode")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
     request.setValue(identity.anonymousID, forHTTPHeaderField: "Identity-Anonymous-ID")
     request.setValue(identity.deviceID, forHTTPHeaderField: "Identity-Device-ID")
