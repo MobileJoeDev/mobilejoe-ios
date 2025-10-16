@@ -16,6 +16,7 @@ import SwiftUI
 import MobileJoe
 
 public struct AlertsStackView: View {
+  @Environment(\.scenePhase) var scenePhase
   @State var alerts: Alerts
 
   public var body: some View {
@@ -23,6 +24,11 @@ public struct AlertsStackView: View {
       ForEach(alerts.all) { alert in
         AlertView(alert: alert)
           .clipShape(.capsule)
+      }
+    }
+    .onChange(of: scenePhase) { oldPhase, newPhase in
+      if newPhase == .active {
+        reload()
       }
     }
     .task {
@@ -36,6 +42,14 @@ public struct AlertsStackView: View {
 
   init(alerts: Alerts) {
     self.alerts = alerts
+  }
+}
+
+extension AlertsStackView {
+  private func reload() {
+    Task {
+      try? await alerts.load()
+    }
   }
 }
 
