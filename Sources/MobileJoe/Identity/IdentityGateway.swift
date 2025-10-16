@@ -26,14 +26,13 @@ class FileBasedIdentityGateway: IdentityGateway {
 
   private static let mbjDirectory = URL.applicationSupportDirectory.appending(path: "MobileJoe")
   private static let identityURL = mbjDirectory.appending(path: "identity.mbj")
-  private let logger: Logger
+  private let logger = Logger(category: "FileBasedIdentityGateway")
   private let fileCoordinator: NSFileCoordinator
   private let fileManager: FileManager
 
   private init() {
     self.fileCoordinator = NSFileCoordinator()
     self.fileManager = .default
-    self.logger = Logger(subsystem: "MobileJoe", category: "FileBasedIdentityGateway")
     findOrCreateIdentityURL()
   }
 

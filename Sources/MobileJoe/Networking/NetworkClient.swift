@@ -42,7 +42,7 @@ class NetworkClient {
   private var apiKey: String
   private var identity: Identity?
   private let router: Router
-  private let logger: Logger = Logger(subsystem: "MobileJoe", category: "NetworkClient")
+  private let logger = Logger(category: "NetworkClient")
 
   init(router: Router = DefaultRouter(), isDebugMode: Bool = false, apiKey: String = "", identity: Identity? = nil) {
     self.router = router
