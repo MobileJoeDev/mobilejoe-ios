@@ -20,6 +20,7 @@ protocol APIClient {
   func getFeatureRequests(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?, page: Int) async throws -> (data: Data, pagination: Pagination)
   func postVoteFeatureRequests(featureRequestID: Int) async throws -> Data
   func postIdentify() async throws
+  var isDebugModeEnabled: Bool { get }
 }
 
 class NetworkClient: APIClient {
@@ -56,6 +57,10 @@ class NetworkClient: APIClient {
     self.isDebugMode = isDebugMode
     self.apiKey = apiKey
     self.identity = identity
+  }
+
+  var isDebugModeEnabled: Bool {
+    isDebugMode
   }
 }
 

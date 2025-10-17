@@ -20,6 +20,11 @@ class APIClientMock: APIClient {
     case missingResult
   }
 
+  var mockDebugMode = false
+  var isDebugModeEnabled: Bool {
+    mockDebugMode
+  }
+
   var getAlertsCallCount = 0
   var mockGetAlertsError: Swift.Error?
   var mockGetAlerts: Data?
