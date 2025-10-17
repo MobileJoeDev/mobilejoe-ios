@@ -133,6 +133,85 @@ struct RemoteAlertGatewayTests {
       #expect(gateway.alerts[0].id == 2)
     }
   }
+
+  @Suite("Debug Mode Behavior")
+  struct DebugModeBehavior {
+    let client: APIClientMock
+    var gateway: RemoteAlertGateway
+
+    init() {
+      client = APIClientMock()
+      client.mockDebugMode = true
+      gateway = RemoteAlertGateway(client: client)
+    }
+
+    @Test
+    func `debug mode bypasses cache on subsequent loads`() async throws {
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 1)])
+
+      // First load
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 1)
+      #expect(gateway.alerts.count == 1)
+      #expect(gateway.alerts[0].id == 1)
+
+      // Change mock data for second load
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 2)])
+
+      // Second load immediately after - should NOT skip in debug mode
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 2) // Should be 2, not 1
+      #expect(gateway.alerts.count == 1)
+      #expect(gateway.alerts[0].id == 2) // Should get new data
+    }
+
+    @Test
+    func `debug mode always fetches even within cache window`() async throws {
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 1)])
+
+      // First load
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 1)
+
+      // Update mock data
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 2)])
+
+      // Multiple loads immediately after - all should fetch in debug mode
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 2)
+
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 3)])
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 3)
+
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 4)])
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 4)
+
+      // Verify we got the latest data
+      #expect(gateway.alerts.count == 1)
+      #expect(gateway.alerts[0].id == 4)
+    }
+
+    @Test
+    func `debug mode ignores lastFetch timestamp`() async throws {
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 1)])
+
+      // First load
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 1)
+
+      // Manually set lastFetch to 1 second ago (well within cache window)
+      gateway.lastFetch = Date(timeIntervalSinceNow: -1)
+
+      client.mockGetAlerts = try encodeAlerts([makeAlert(id: 2)])
+
+      // Should still fetch because debug mode is enabled
+      try await gateway.load()
+      #expect(client.getAlertsCallCount == 2)
+      #expect(gateway.alerts[0].id == 2)
+    }
+  }
 }
 
 // MARK: - Helpers

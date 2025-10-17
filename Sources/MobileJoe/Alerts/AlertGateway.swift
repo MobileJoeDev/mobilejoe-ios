@@ -48,6 +48,9 @@ class RemoteAlertGateway: AlertGateway {
   }
 
   private var isEligibleToLoad: Bool {
+    if client.isDebugModeEnabled {
+      return true
+    }
     guard let lastFetch else { return true }
     return lastFetch.addingTimeInterval(15 * 60) < .now
   }
