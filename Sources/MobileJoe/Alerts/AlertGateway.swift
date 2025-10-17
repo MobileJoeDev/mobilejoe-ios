@@ -13,6 +13,7 @@
 //
 
 import Foundation
+import OSLog
 
 public protocol AlertGateway {
   var alerts: [Alert] { get }
@@ -22,17 +23,33 @@ public protocol AlertGateway {
 class RemoteAlertGateway: AlertGateway {
   static var shared = RemoteAlertGateway()
 
-  private let client: NetworkClient
+  private let client: APIClient
+  internal var lastFetch: Date? = nil
+  private let logger = Logger(category: "RemoteAlertGateway")
 
-  init(client: NetworkClient = NetworkClient.shared) {
+  init(client: APIClient = NetworkClient.shared) {
     self.client = client
   }
 
   var alerts = [Alert]()
 
   func load() async throws {
+    guard isEligibleToLoad else {
+      logger.debug("Postpone loading.")
+      return
+    }
     let response = try await client.getAlerts()
     alerts = try Parser().parse(response)
+    updateLastFetched()
+  }
+
+  private func updateLastFetched() {
+    lastFetch = .now
+  }
+
+  private var isEligibleToLoad: Bool {
+    guard let lastFetch else { return true }
+    return lastFetch.addingTimeInterval(15 * 60) < .now
   }
 }
 

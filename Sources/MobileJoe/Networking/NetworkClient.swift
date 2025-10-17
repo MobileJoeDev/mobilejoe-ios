@@ -15,7 +15,14 @@
 import Foundation
 import OSLog
 
-class NetworkClient {
+protocol APIClient {
+  func getAlerts() async throws -> Data
+  func getFeatureRequests(filterBy statuses: [FeatureRequest.Status]?, sort sorting: FeatureRequest.Sorting, search: String?, page: Int) async throws -> (data: Data, pagination: Pagination)
+  func postVoteFeatureRequests(featureRequestID: Int) async throws -> Data
+  func postIdentify() async throws
+}
+
+class NetworkClient: APIClient {
   static let shared = NetworkClient()
 
   @discardableResult
