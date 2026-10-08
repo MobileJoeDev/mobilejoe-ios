@@ -1,0 +1,125 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "feature-plans.error.unknown-feature-plan.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannter Feature Plan"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown Feature Plan"
+          }
+        }
+      }
+    },
+    "sdk.error.http-failure.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server konnte die Anfrage nicht ausführen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The server could not complete the request."
+          }
+        }
+      }
+    },
+    "sdk.error.invalid-app-user-id.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App-Benutzer-ID darf nicht leer sein. Verwende eine stabile Konto-ID."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app user ID must not be empty. Use a stable account ID."
+          }
+        }
+      }
+    },
+    "sdk.error.invalid-http-response.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MobileJoe hat eine ungültige Serverantwort erhalten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MobileJoe received an invalid server response."
+          }
+        }
+      }
+    },
+    "sdk.error.invalid-url.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MobileJoe konnte keine gültige Anfrage-URL erstellen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MobileJoe could not create a valid request URL."
+          }
+        }
+      }
+    },
+    "sdk.error.not-configured.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MobileJoe ist nicht konfiguriert. Schließe die SDK-Konfiguration ab und versuche es erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MobileJoe is not configured. Complete SDK configuration before trying again."
+          }
+        }
+      }
+    },
+    "sdk.error.unknown-identity.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es ist keine MobileJoe-Identität verfügbar. Schließe die Konfiguration oder Identifizierung ab und versuche es erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No MobileJoe identity is available. Complete configuration or identification before trying again."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
