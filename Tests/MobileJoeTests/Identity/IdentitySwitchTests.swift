@@ -19,11 +19,11 @@ struct IdentitySwitchTests {
     router.nextResult = (Data(), response)
   }
 
-  @Test func firstLoginKeepsAnonymousIDs() async throws {
-    try await client.identify(externalID: nil)
+  @Test func `first login keeps anonymous IDs`() async throws {
+    try await client.identifyAndSend(externalID: nil)
     let anonymous = try #require(manager.currentIdentity)
 
-    try await client.identify(externalID: "A")
+    try await client.identifyAndSend(externalID: "A")
 
     let identity = try #require(manager.currentIdentity)
     #expect(identity.anonymousID == anonymous.anonymousID)
@@ -32,33 +32,33 @@ struct IdentitySwitchTests {
     #expect(gateway.deleteCalled == false)
   }
 
-  @Test func sameAccountAgainKeepsIdentityWithoutRequest() async throws {
-    try await client.identify(externalID: "A")
+  @Test func `same app user ID again keeps identity without request`() async throws {
+    try await client.identifyAndSend(externalID: "A")
     let identity = manager.currentIdentity
 
-    try await client.identify(externalID: "A")
+    try await client.identifyAndSend(externalID: "A")
 
     #expect(manager.currentIdentity == identity)
     #expect(router.performCallCount == 1)
     #expect(gateway.deleteCalled == false)
   }
 
-  @Test func persistedSameAccountKeepsIDs() async throws {
+  @Test func `persisted identity with same app user ID keeps IDs`() async throws {
     let persisted = Identity(externalID: "A")
     gateway.findReturnValue = persisted
 
-    try await client.identify(externalID: "A")
+    try await client.identifyAndSend(externalID: "A")
 
     #expect(manager.currentIdentity == persisted)
     #expect(router.lastRequest?.value(forHTTPHeaderField: "Identity-Anonymous-ID") == persisted.anonymousID)
     #expect(gateway.deleteCalled == false)
   }
 
-  @Test func switchingAccountLogsOutFirst() async throws {
-    try await client.identify(externalID: "A")
+  @Test func `switching app user ID logs out first`() async throws {
+    try await client.identifyAndSend(externalID: "A")
     let accountA = try #require(manager.currentIdentity)
 
-    try await client.identify(externalID: "B")
+    try await client.identifyAndSend(externalID: "B")
 
     let accountB = try #require(manager.currentIdentity)
     #expect(gateway.deleteCalled)
@@ -70,23 +70,23 @@ struct IdentitySwitchTests {
     #expect(request.value(forHTTPHeaderField: "Identity-External-ID") == accountB.externalID)
   }
 
-  @Test func persistedAccountSwitchLogsOutFirst() async throws {
+  @Test func `switching from persisted app user ID logs out first`() async throws {
     let accountA = Identity(externalID: "A")
     gateway.findReturnValue = accountA
 
-    try await client.identify(externalID: "B")
+    try await client.identifyAndSend(externalID: "B")
 
     let accountB = try #require(manager.currentIdentity)
     #expect(accountB.anonymousID != accountA.anonymousID)
     #expect(accountB.externalID == Identity.hashExternalID(from: "B"))
   }
 
-  @Test func configurationWithoutAppUserIDKeepsPersistedAccount() async throws {
+  @Test func `configuration without app user ID keeps persisted identity`() async throws {
     let accountA = Identity(externalID: "A")
     gateway.findReturnValue = accountA
     let client = NetworkClient(router: router, identityManager: manager)
 
-    try await client.configure(withAPIKey: "api-key", externalID: nil)
+    try await client.configureAndSend(withAPIKey: "api-key", externalID: nil)
 
     #expect(manager.currentIdentity == accountA)
     #expect(gateway.deleteCalled == false)
@@ -94,18 +94,18 @@ struct IdentitySwitchTests {
     #expect(request.value(forHTTPHeaderField: "Identity-Anonymous-ID") == accountA.anonymousID)
     #expect(request.value(forHTTPHeaderField: "Identity-External-ID") == accountA.externalID)
 
-    try await client.identify(externalID: "A")
+    try await client.identifyAndSend(externalID: "A")
     #expect(manager.currentIdentity == accountA)
     #expect(router.performCallCount == 1)
   }
 
-  @Test func identificationAfterConfigurationWithoutAppUserIDSwitchesAccount() async throws {
+  @Test func `identification after configuration without app user ID switches identity`() async throws {
     let accountA = Identity(externalID: "A")
     gateway.findReturnValue = accountA
     let client = NetworkClient(router: router, identityManager: manager)
-    try await client.configure(withAPIKey: "api-key", externalID: nil)
+    try await client.configureAndSend(withAPIKey: "api-key", externalID: nil)
 
-    try await client.identify(externalID: "B")
+    try await client.identifyAndSend(externalID: "B")
 
     let accountB = try #require(manager.currentIdentity)
     #expect(gateway.deleteCalled)
@@ -113,35 +113,52 @@ struct IdentitySwitchTests {
     #expect(accountB.externalID == Identity.hashExternalID(from: "B"))
   }
 
-  @Test func identificationWithoutAppUserIDKeepsAccount() async throws {
-    try await client.identify(externalID: "A")
+  @Test func `configuration with different app user ID never uses previous identity`() async throws {
+    let accountA = Identity(externalID: "A")
+    gateway.findReturnValue = accountA
+    let client = NetworkClient(router: router, identityManager: manager)
+
+    let identity = try #require(try client.configure(withAPIKey: "api-key", externalID: "B"))
+    _ = try await client.getAlerts()
+    await client.send(identity)
+
+    #expect(gateway.deleteCalled)
+    #expect(router.requests.map(\.url?.path) == ["/v1/alerts", "/v1/identify"])
+    for request in router.requests {
+      #expect(request.value(forHTTPHeaderField: "Identity-Anonymous-ID") != accountA.anonymousID)
+      #expect(request.value(forHTTPHeaderField: "Identity-External-ID") == Identity.hashExternalID(from: "B"))
+    }
+  }
+
+  @Test func `identification without app user ID keeps identity`() async throws {
+    try await client.identifyAndSend(externalID: "A")
     let accountA = manager.currentIdentity
 
-    try await client.identify(externalID: nil)
+    try await client.identifyAndSend(externalID: nil)
 
     #expect(manager.currentIdentity == accountA)
     #expect(router.performCallCount == 1)
     #expect(gateway.deleteCalled == false)
   }
 
-  @Test func anonymousIdentificationWhenAnonymousKeepsIDs() async throws {
-    try await client.identify(externalID: nil)
+  @Test func `anonymous identification when anonymous keeps IDs`() async throws {
+    try await client.identifyAndSend(externalID: nil)
     let anonymous = manager.currentIdentity
 
-    try await client.identify(externalID: nil)
+    try await client.identifyAndSend(externalID: nil)
 
     #expect(manager.currentIdentity == anonymous)
     #expect(gateway.deleteCalled == false)
   }
 
-  @Test func loginAfterLogoutKeepsFreshAnonymousIDs() async throws {
-    try await client.identify(externalID: "A")
+  @Test func `login after logout keeps fresh anonymous IDs`() async throws {
+    try await client.identifyAndSend(externalID: "A")
     let accountA = try #require(manager.currentIdentity)
-    try await client.logout()
+    _ = try client.logout()
     let loggedOut = try #require(manager.currentIdentity)
     gateway.deleteCalled = false
 
-    try await client.identify(externalID: "B")
+    try await client.identifyAndSend(externalID: "B")
 
     let accountB = try #require(manager.currentIdentity)
     #expect(accountB.anonymousID == loggedOut.anonymousID)
@@ -150,30 +167,29 @@ struct IdentitySwitchTests {
     #expect(gateway.deleteCalled == false)
   }
 
-  @Test func failedSwitchKeepsFreshAnonymousIdentity() async throws {
-    try await client.identify(externalID: "A")
+  @Test func `failed switch keeps new identity`() async throws {
+    try await client.identifyAndSend(externalID: "A")
     let accountA = try #require(manager.currentIdentity)
     router.nextError = URLError(.timedOut)
 
-    await #expect(throws: URLError(.timedOut)) { try await client.identify(externalID: "B") }
+    try await client.identifyAndSend(externalID: "B")
 
-    let anonymous = try #require(manager.currentIdentity)
-    #expect(anonymous.externalID == nil)
-    #expect(anonymous.anonymousID != accountA.anonymousID)
-    #expect(gateway.findReturnValue == anonymous)
-
-    try await client.identify(externalID: "B")
     let accountB = try #require(manager.currentIdentity)
-    #expect(accountB.anonymousID == anonymous.anonymousID)
     #expect(accountB.externalID == Identity.hashExternalID(from: "B"))
+    #expect(accountB.anonymousID != accountA.anonymousID)
+    #expect(gateway.findReturnValue == accountB)
+
+    try await client.identifyAndSend(externalID: "B")
+    #expect(router.performCallCount == 2)
+    #expect(manager.currentIdentity == accountB)
   }
 
   @Test(arguments: ["", " ", "\n\t "])
-  func emptyAppUserIDIsRejected(appUserID: String) async throws {
-    try await client.identify(externalID: "A")
+  func `empty app user ID is rejected`(appUserID: String) async throws {
+    try await client.identifyAndSend(externalID: "A")
     let accountA = manager.currentIdentity
 
-    let error = await #expect(throws: MobileJoeError.self) { try await client.identify(externalID: appUserID) }
+    let error = #expect(throws: MobileJoeError.self) { try client.identify(externalID: appUserID) }
 
     if case .invalidAppUserID = error {} else { Issue.record("Expected invalid app user ID") }
 
@@ -183,17 +199,17 @@ struct IdentitySwitchTests {
   }
 
   @Test(arguments: ["", "  "])
-  func emptyAppUserIDFailsConfiguration(appUserID: String) async throws {
+  func `empty app user ID fails configuration`(appUserID: String) throws {
     let client = NetworkClient(router: router, identityManager: manager)
 
-    let error = await #expect(throws: MobileJoeError.self) {
-      try await client.configure(withAPIKey: "api-key", externalID: appUserID)
+    let error = #expect(throws: MobileJoeError.self) {
+      try client.configure(withAPIKey: "api-key", externalID: appUserID)
     }
 
     if case .invalidAppUserID = error {} else { Issue.record("Expected invalid app user ID") }
     #expect(gateway.findCallCount == 0)
     #expect(router.performCallCount == 0)
-    try await client.configure(withAPIKey: "api-key", externalID: "A")
+    _ = try client.configure(withAPIKey: "api-key", externalID: "A")
     #expect(manager.currentIdentity?.externalID == Identity.hashExternalID(from: "A"))
   }
 }

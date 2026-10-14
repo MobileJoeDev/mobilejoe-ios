@@ -3,7 +3,7 @@
 
 import Foundation
 
-public protocol FeaturePlanGateway {
+package protocol FeaturePlanGateway {
   var featurePlans: [FeaturePlan] { get }
   func reload(filterBy statuses: [FeaturePlan.Status]?, sort sorting: FeaturePlan.Sorting, search: String?) async throws
   func load(filterBy statuses: [FeaturePlan.Status]?, sort sorting: FeaturePlan.Sorting, search: String?) async throws
@@ -11,6 +11,6 @@ public protocol FeaturePlanGateway {
   func vote(_ featurePlan: FeaturePlan) async throws
 }
 
-enum FeaturePlanGatewayError: Error {
+package enum FeaturePlanGatewayError: Error {
   case unknownFeaturePlan
 }

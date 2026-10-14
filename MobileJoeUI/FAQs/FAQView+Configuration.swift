@@ -5,7 +5,7 @@ import Foundation
 import MobileJoe
 
 extension FAQView {
-  /// Configure this to show additional contact support information below each FAQ item in the `FAQDetailView`.
+  /// Configure this to show additional contact support information below the FAQ list and below each FAQ item in the `FAQDetailView`.
   /// **Note:** The information is only being presented if `recipient` is not empty.
   public struct Configuration: Sendable {
     let recipient: String

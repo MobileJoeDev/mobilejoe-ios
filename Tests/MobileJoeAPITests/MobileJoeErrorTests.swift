@@ -13,9 +13,10 @@ struct MobileJoeErrorTests {
     (.invalidHTTPResponse, 1004),
     (.httpFailure(statusCode: 401, method: "POST", path: "/v1/identify"), 1005),
     (.httpFailure(statusCode: 503, method: "GET", path: "/v1/faqs"), 1005),
-    (.invalidAppUserID, 1006)
+    (.invalidAppUserID, 1006),
+    (.invalidAPIKey, 1007)
   ])
-  func stableMonitoringIdentifiersAndReadableMessages(error: MobileJoeError, code: Int) throws {
+  func `stable monitoring identifiers and readable messages`(error: MobileJoeError, code: Int) throws {
     let erased: any Error = error
     let bridged = erased as NSError
     let description = try #require(error.errorDescription)
@@ -29,7 +30,7 @@ struct MobileJoeErrorTests {
     #expect(bridged.userInfo[NSLocalizedDescriptionKey] as? String == description)
   }
 
-  @Test func catchesSDKCasesThroughErrorExistential() {
+  @Test func `catches SDK cases through error existential`() {
     let error: any Error = MobileJoeError.httpFailure(statusCode: 429, method: "GET", path: "/v1/faqs")
     do {
       throw error
@@ -41,7 +42,7 @@ struct MobileJoeErrorTests {
     }
   }
 
-  @Test func bridgesHTTPContext() {
+  @Test func `bridges HTTP context`() {
     let error = MobileJoeError.httpFailure(statusCode: 403, method: "POST", path: "/v1/feature_plans/42/vote")
     let bridged = error as NSError
 
@@ -51,7 +52,7 @@ struct MobileJoeErrorTests {
     #expect(String(reflecting: error) == "MobileJoeError.httpFailure: POST /v1/feature_plans/42/vote returned HTTP 403")
   }
 
-  @Test func diagnosticsOmitInvalidURLContents() throws {
+  @Test func `diagnostics omit invalid URL contents`() throws {
     let components = try #require(URLComponents(string: "https://example.com/faqs?search=private-search"))
     let error = MobileJoeError.invalidURL(components: components)
 
@@ -66,9 +67,10 @@ struct MobileJoeErrorTests {
     MobileJoeError.invalidHTTPResponse,
     MobileJoeError.httpFailure(statusCode: 503, method: "GET", path: "/v1/faqs"),
     MobileJoeError.invalidAppUserID,
+    MobileJoeError.invalidAPIKey,
     FeaturePlansError.unknownFeaturePlan
   ] as [any LocalizedError])
-  func errorsAreLocalizedAwayFromMainActor(error: any LocalizedError) async throws {
+  func `errors are localized away from main actor`(error: any LocalizedError) async throws {
     let description = try await Task.detached {
       try #require(error.errorDescription)
     }.value
@@ -76,11 +78,5 @@ struct MobileJoeErrorTests {
     #expect(!description.hasPrefix("sdk.error."))
     #expect(!description.hasPrefix("feature-plans.error."))
     #expect((error as NSError).localizedDescription == description)
-  }
-
-  @Test func preservesPublicFeaturePlanNotFoundError() async {
-    await #expect(throws: FeaturePlansError.unknownFeaturePlan) {
-      try await FeaturePlans.previewEmpty.featurePlan(id: 42)
-    }
   }
 }

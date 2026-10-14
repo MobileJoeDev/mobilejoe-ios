@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE for details.
 
 import Foundation
+import MobileJoe
 
+@MainActor
 class InMemoryAlertGateway: AlertGateway {
   var alerts: [Alert]
   private let seedData: [Alert]
@@ -23,7 +25,9 @@ class InMemoryAlertGateway: AlertGateway {
 // MARK: - Seed Data
 
 extension InMemoryAlertGateway {
-  static let seed = InMemoryAlertGateway(seedData: InMemoryAlertGateway.seedData)
+  static var seed: InMemoryAlertGateway {
+    InMemoryAlertGateway(seedData: seedData)
+  }
 
   private static var seedData: [Alert] {
     [
@@ -57,7 +61,7 @@ extension InMemoryAlertGateway {
     ]
   }
 
-  public static var singleAlert: [Alert] {
+  static var singleAlert: [Alert] {
     [
       Alert(
         id: 1,

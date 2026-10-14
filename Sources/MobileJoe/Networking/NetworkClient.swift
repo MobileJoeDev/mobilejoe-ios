@@ -16,30 +16,18 @@ protocol APIClient {
 class NetworkClient: APIClient {
   static let shared = NetworkClient()
 
-  func configure(withAPIKey apiKey: String, externalID: String?, debugMode: Bool = false) async throws {
-    try validate(externalID: externalID)
-    if let configurationTask {
-      return try await configurationTask.value
+  func configure(withAPIKey apiKey: String, externalID: String?, debugMode: Bool = false) throws -> Identity? {
+    guard !isConfigurationStarted else {
+      logger.warning("🦫 Joe says: SDK already configured. Nothing changed.")
+      return nil
     }
 
-    self.apiKey = ""
-    let task = identityOperations.enqueue(.configuration) {
-      do {
-        try await self.synchronizeIdentity(externalID: externalID, apiKey: apiKey, debugMode: debugMode)
-        self.apiKey = apiKey
-        self.isDebugMode = debugMode
-        self.logger.debug("🦫 Joe says: SDK configured successfully.")
-      } catch {
-        self.configurationTask = nil
-        throw error
-      }
-    }
-    configurationTask = task
-    try await task.value
-  }
-
-  static var isConfigured: Bool {
-    shared.apiKey.isNotEmpty
+    let identity = try identityManager.identifyAtStart(externalID: externalID)
+    self.apiKey = apiKey
+    self.isDebugMode = debugMode
+    isConfigurationStarted = true
+    logger.debug("🦫 Joe says: SDK configured successfully.")
+    return identity
   }
 
   private static let serverHostURL = URL(string: "https://mbj-api.com")!
@@ -47,8 +35,7 @@ class NetworkClient: APIClient {
 
   private var isDebugMode: Bool
   private var apiKey: String
-  private let identityOperations = IdentityOperationQueue()
-  private var configurationTask: Task<Void, Error>?
+  private var isConfigurationStarted = false
   private let identityManager: IdentityManager
   private let router: Router
   private let logger = Logger(category: "NetworkClient")
@@ -67,46 +54,32 @@ class NetworkClient: APIClient {
 
 // MARK: - Identify
 extension NetworkClient {
-  func identify(externalID: String?) async throws {
-    try validate(externalID: externalID)
-    let configuration = configurationTask
-    guard configuration != nil || apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
-    let task = identityOperations.enqueue(.identification(externalID)) {
-      if let configuration { try await configuration.value }
-      try await self.synchronizeIdentity(externalID: externalID, apiKey: self.apiKey, debugMode: self.isDebugMode)
-    }
-    try await task.value
-  }
-
-  func logout() async throws {
-    let configuration = configurationTask
-    let task = identityOperations.enqueue(.logout) {
-      if let configuration { try await configuration.value }
-      _ = try await self.identityManager.logout()
-    }
-    try await task.value
-  }
-
-  private func synchronizeIdentity(externalID: String?, apiKey: String, debugMode: Bool) async throws {
+  func identify(externalID: String?) throws -> Identity? {
     guard apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
-    guard let identity = try await identityManager.prepareIdentity(for: externalID) else { return }
-    try await postIdentify(identity: identity, apiKey: apiKey, debugMode: debugMode)
-    try await identityManager.commit(identity)
+    return try identityManager.identify(externalID: externalID)
   }
 
-  private func validate(externalID: String?) throws {
-    if let externalID, externalID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-      throw MobileJoeError.invalidAppUserID
+  func logout() throws -> Identity {
+    try identityManager.logout()
+  }
+
+  func send(_ identity: Identity) async {
+    guard apiKey.isNotEmpty, identityManager.isCurrent(identity) else { return }
+    do {
+      try await postIdentify(identity: identity)
+    } catch MobileJoeError.invalidAPIKey {
+      return
+    } catch {
+      logger.error("🦫 Joe says: Failed to identify the app user. Retrying on next app start. \(String(reflecting: error), privacy: .public)")
     }
   }
 
-  private func postIdentify(identity: Identity, apiKey: String, debugMode: Bool) async throws {
+  private func postIdentify(identity: Identity) async throws {
     let components = try url(for: "identify")
     guard let url = components.url else { throw MobileJoeError.invalidURL(components: components) }
-    let request = try urlRequest(for: url, httpMethod: .post, identity: identity, apiKey: apiKey, debugMode: debugMode)
-    _ = try await router.perform(request)
+    let request = try urlRequest(for: url, httpMethod: .post, identity: identity)
+    _ = try await perform(request)
   }
-
 }
 
 // MARK: - FeaturePlans
@@ -178,17 +151,23 @@ extension NetworkClient {
 // MARK: - Helper
 extension NetworkClient {
   private func perform(_ request: URLRequest) async throws -> (data: Data, response: HTTPURLResponse) {
-    guard apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
-    return try await router.perform(request)
+    do {
+      return try await router.perform(request)
+    } catch MobileJoeError.invalidAPIKey {
+      discardInvalidAPIKey()
+      throw MobileJoeError.invalidAPIKey
+    }
   }
 
-  private func urlRequest(for url: URL, httpMethod: HTTPMethod) throws -> URLRequest {
-    guard apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
-    guard let identity = identityManager.currentIdentity else { throw MobileJoeError.unknownIdentity }
-    return try urlRequest(for: url, httpMethod: httpMethod, identity: identity, apiKey: apiKey, debugMode: isDebugMode)
+  private func discardInvalidAPIKey() {
+    guard apiKey.isNotEmpty else { return }
+    apiKey = ""
+    logger.error("🦫 Joe says: Invalid API key. The SDK is disabled until the app restarts with a valid key.")
   }
 
-  private func urlRequest(for url: URL, httpMethod: HTTPMethod, identity: Identity, apiKey: String, debugMode: Bool) throws -> URLRequest {
+  private func urlRequest(for url: URL, httpMethod: HTTPMethod, identity: Identity? = nil) throws -> URLRequest {
+    guard apiKey.isNotEmpty else { throw MobileJoeError.notConfigured }
+    guard let identity = identity ?? identityManager.currentIdentity else { throw MobileJoeError.unknownIdentity }
     var request = URLRequest(url: url)
     request.httpMethod = httpMethod.rawValue
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -199,7 +178,7 @@ extension NetworkClient {
     request.setValue(SystemInfo.appVersion, forHTTPHeaderField: "App-Version")
     request.setValue(SystemInfo.appBuildVersion, forHTTPHeaderField: "App-Build-Version")
     request.setValue(SystemInfo.preferredLanguages, forHTTPHeaderField: "Preferred-Languages")
-    request.setValue("\(debugMode)", forHTTPHeaderField: "Debug-Mode")
+    request.setValue("\(isDebugMode)", forHTTPHeaderField: "Debug-Mode")
     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
     request.setValue(identity.anonymousID, forHTTPHeaderField: "Identity-Anonymous-ID")
     request.setValue(identity.deviceID, forHTTPHeaderField: "Identity-Device-ID")

@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE for details.
 
 import Foundation
+import MobileJoe
 
+@MainActor
 class InMemoryFeaturePlanGateway: FeaturePlanGateway {
   var featurePlans: [FeaturePlan]
   private let seedData: [FeaturePlan]
@@ -10,18 +12,17 @@ class InMemoryFeaturePlanGateway: FeaturePlanGateway {
 
   init(seedData: [FeaturePlan] = [], loadError: Swift.Error? = nil) {
     self.seedData = seedData
-    self.featurePlans = seedData
+    self.featurePlans = Self.sort(seedData, by: .byNewest)
     self.loadError = loadError
   }
 
   func reload(filterBy statuses: [FeaturePlan.Status]?, sort sorting: FeaturePlan.Sorting, search: String?) async throws {
-    if let loadError { throw loadError }
-    featurePlans = filter(seedData, by: statuses, search: search)
+    try await load(filterBy: statuses, sort: sorting, search: search)
   }
 
   func load(filterBy statuses: [FeaturePlan.Status]?, sort sorting: FeaturePlan.Sorting, search: String?) async throws {
     if let loadError { throw loadError }
-    featurePlans = filter(seedData, by: statuses, search: search)
+    featurePlans = Self.sort(filter(seedData, by: statuses, search: search), by: sorting)
   }
 
   func featurePlan(id: Int) async throws -> FeaturePlan {
@@ -60,12 +61,21 @@ class InMemoryFeaturePlanGateway: FeaturePlanGateway {
     }
     return result
   }
+
+  private static func sort(_ data: [FeaturePlan], by sorting: FeaturePlan.Sorting) -> [FeaturePlan] {
+    switch sorting {
+    case .byNewest: data.sorted { $0.createdAt > $1.createdAt }
+    case .byScore: data.sorted { $0.score > $1.score }
+    }
+  }
 }
 
 // MARK: - Seed Data
 
 extension InMemoryFeaturePlanGateway {
-  static let seed = InMemoryFeaturePlanGateway(seedData: InMemoryFeaturePlanGateway.seedData)
+  static var seed: InMemoryFeaturePlanGateway {
+    InMemoryFeaturePlanGateway(seedData: seedData)
+  }
 
   private static var seedData: [FeaturePlan] {
     [

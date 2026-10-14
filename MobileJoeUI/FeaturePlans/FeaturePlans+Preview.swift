@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE for details.
 
 import Foundation
+import MobileJoe
 
+@MainActor
 extension FeaturePlans {
   public static var preview: FeaturePlans {
     let gateway = InMemoryFeaturePlanGateway.seed

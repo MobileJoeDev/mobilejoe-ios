@@ -42,7 +42,7 @@ struct RemoteFAQGatewayTests {
     }
 
     @Test(arguments: [false, true])
-    func loadReplacesExistingFAQsWithoutDelay(isDebugMode: Bool) async throws {
+    func `load replaces existing FAQs without delay`(isDebugMode: Bool) async throws {
       client.mockDebugMode = isDebugMode
       client.mockGetFAQs = try encodeFAQs([makeFAQ(id: 1)])
 

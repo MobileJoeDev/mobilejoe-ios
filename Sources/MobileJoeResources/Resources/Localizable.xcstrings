@@ -35,6 +35,23 @@
         }
       }
     },
+    "sdk.error.invalid-api-key.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der API-Key ist ungültig. Verwende den API-Key deiner App aus dem Dashboard von Mobile Joe."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The API key is invalid. Use your app's API key from the Mobile Joe dashboard."
+          }
+        }
+      }
+    },
     "sdk.error.invalid-app-user-id.description" : {
       "extractionState" : "manual",
       "localizations" : {

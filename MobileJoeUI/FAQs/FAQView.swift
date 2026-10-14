@@ -29,11 +29,9 @@ public struct FAQView: View {
   }
 
   public init(presentationMode: PresentationMode, configuration: Configuration) {
-    self.init(
-      faqs: FAQs(),
-      presentationMode: presentationMode,
-      configuration: configuration
-    )
+    self.faqs = FAQs()
+    self.presentationMode = presentationMode
+    self.configuration = configuration
   }
 
   public init(faqs: FAQs, presentationMode: PresentationMode, configuration: Configuration) {
@@ -49,7 +47,7 @@ public struct FAQView: View {
     FAQView(
       faqs: .preview,
       presentationMode: .inNavigationStack,
-      configuration: .standard(recipient: "")
+      configuration: .standard(recipient: "hey@mobilejoe.dev")
     )
   }
 }
@@ -80,7 +78,7 @@ public struct FAQView: View {
       FAQView(
         faqs: .preview,
         presentationMode: .asSheet,
-        configuration: .standard(recipient: "")
+        configuration: .standard(recipient: "hey@mobilejoe.dev")
       )
     }
 }

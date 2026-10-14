@@ -4,7 +4,7 @@
 import Foundation
 
 struct SystemInfo {
-  static let frameworkVersion = "1.0.0"
+  static let frameworkVersion = "1.0.1"
   static let osName = "iOS"
   static let osVersion = ProcessInfo.processInfo.operatingSystemVersion.apiDescription
   static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""

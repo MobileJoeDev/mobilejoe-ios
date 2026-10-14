@@ -35,10 +35,7 @@ class RouterMock: Router {
       throw Error.missingResult
     }
 
-    guard result.response.isSuccessful else {
-      throw MobileJoeError.httpFailure(statusCode: result.response.statusCode, method: request.httpMethod ?? "GET", path: request.url?.path ?? "")
-    }
-
+    try result.response.validate(for: request)
     return result
   }
 }

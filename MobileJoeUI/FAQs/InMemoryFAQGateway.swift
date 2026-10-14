@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE for details.
 
 import Foundation
+import MobileJoe
 
+@MainActor
 class InMemoryFAQGateway: FAQGateway {
   var faqs: [FAQItem]
   private let seedData: [FAQItem]
@@ -23,7 +25,9 @@ class InMemoryFAQGateway: FAQGateway {
 // MARK: - Seed Data
 
 extension InMemoryFAQGateway {
-  static let seed = InMemoryFAQGateway(seedData: InMemoryFAQGateway.seedData)
+  static var seed: InMemoryFAQGateway {
+    InMemoryFAQGateway(seedData: seedData)
+  }
 
   private static var seedData: [FAQItem] {
     [
@@ -37,7 +41,7 @@ extension InMemoryFAQGateway {
       ),
       FAQItem(
         id: 2,
-        title: "How do I create an account?",
+        title: "How do I create an account if I already signed up with a different email address?",
         body: "Navigate to the signup page and fill in the required fields including your email and password.",
         position: 2,
         createdAt: .distantPast,
@@ -54,7 +58,7 @@ extension InMemoryFAQGateway {
     ]
   }
 
-  public static var singleFAQ: [FAQItem] {
+  static var singleFAQ: [FAQItem] {
     [
       FAQItem(
         id: 1,

@@ -11,6 +11,7 @@ public enum MobileJoeError: LocalizedError, CustomNSError, CustomDebugStringConv
   case invalidHTTPResponse
   case httpFailure(statusCode: Int, method: String, path: String)
   case invalidAppUserID
+  case invalidAPIKey
 
   public var errorDescription: String? {
     switch self {
@@ -20,6 +21,7 @@ public enum MobileJoeError: LocalizedError, CustomNSError, CustomDebugStringConv
     case .invalidHTTPResponse: String(localized: "sdk.error.invalid-http-response.description", bundle: Resources.bundle)
     case .httpFailure: String(localized: "sdk.error.http-failure.description", bundle: Resources.bundle)
     case .invalidAppUserID: String(localized: "sdk.error.invalid-app-user-id.description", bundle: Resources.bundle)
+    case .invalidAPIKey: String(localized: "sdk.error.invalid-api-key.description", bundle: Resources.bundle)
     }
   }
 
@@ -34,6 +36,7 @@ public enum MobileJoeError: LocalizedError, CustomNSError, CustomDebugStringConv
     case .invalidHTTPResponse: 1004
     case .httpFailure: 1005
     case .invalidAppUserID: 1006
+    case .invalidAPIKey: 1007
     }
   }
 
@@ -56,6 +59,7 @@ public enum MobileJoeError: LocalizedError, CustomNSError, CustomDebugStringConv
     case .invalidHTTPResponse: "MobileJoeError.invalidHTTPResponse"
     case let .httpFailure(statusCode, method, path): "MobileJoeError.httpFailure: \(method) \(path) returned HTTP \(statusCode)"
     case .invalidAppUserID: "MobileJoeError.invalidAppUserID"
+    case .invalidAPIKey: "MobileJoeError.invalidAPIKey"
     }
   }
 }

@@ -3,7 +3,7 @@
 
 import Foundation
 
-public protocol AlertGateway {
+package protocol AlertGateway {
   var alerts: [Alert] { get }
   func load() async throws
 }

@@ -88,10 +88,11 @@ extension FeaturePlanDetailView {
 }
 
 #Preview {
+  let featurePlans = FeaturePlans.preview
   NavigationStack {
     FeaturePlanDetailView(
-      featurePlan: FeaturePlans.preview.all.first!,
-      featurePlans: .preview
+      featurePlan: featurePlans.all.first!,
+      featurePlans: featurePlans
     )
   }
 }

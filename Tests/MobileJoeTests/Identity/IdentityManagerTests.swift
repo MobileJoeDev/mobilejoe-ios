@@ -14,34 +14,47 @@ struct IdentityManagerTests {
     manager = IdentityManager(gateway: gatewayMock)
   }
 
-  @Test func `find or create identity when none present`() async throws {
-    let identity = try #require(await manager.prepareIdentity(for: nil))
-    #expect(manager.currentIdentity == nil)
-    #expect(gatewayMock.saveIdentityCalledWithIdentity == nil)
-    try await manager.commit(identity)
+  @Test func `find or create identity when none present`() throws {
+    let identity = try #require(try manager.identify(externalID: nil))
 
     #expect(identity.externalID == nil)
     #expect(manager.currentIdentity == identity)
     #expect(gatewayMock.saveIdentityCalledWithIdentity == identity)
   }
 
-  @Test func `find or create identity finds existing identity`() async throws {
+  @Test func `find or create identity finds existing identity`() throws {
     gatewayMock.findReturnValue = Identity(externalID: "external-id")
 
-    let identity = try #require(await manager.prepareIdentity(for: "external-id"))
-    try await manager.commit(identity)
+    let identity = try #require(try manager.identify(externalID: "external-id"))
 
     #expect(identity.externalID == Identity.hashExternalID(from: "external-id"))
     #expect(manager.currentIdentity == identity)
-    #expect(gatewayMock.saveIdentityCalledWithIdentity == nil)
+    #expect(gatewayMock.saveIdentityCalledWithIdentity == identity)
   }
 
-  @Test func `switching account replaces existing identity with fresh IDs`() async throws {
+  @Test func `identified identity is persisted and identifying it again changes nothing`() throws {
+    let identity = try #require(try manager.identify(externalID: "external-id"))
+
+    #expect(identity.externalID == Identity.hashExternalID(from: "external-id"))
+    #expect(manager.currentIdentity == identity)
+    #expect(gatewayMock.saveIdentityCalledWithIdentity == identity)
+
+    #expect(try manager.identify(externalID: "external-id") == nil)
+    #expect(manager.currentIdentity == identity)
+  }
+
+  @Test func `identifying at start returns the identity left by an earlier logout`() throws {
+    let loggedOut = try manager.logout()
+
+    #expect(try manager.identify(externalID: nil) == nil)
+    #expect(try manager.identifyAtStart(externalID: nil) == loggedOut)
+  }
+
+  @Test func `switching app user ID replaces existing identity with fresh IDs`() throws {
     let existing = Identity(externalID: "external-id")
     gatewayMock.findReturnValue = existing
 
-    let identity = try #require(await manager.prepareIdentity(for: "external-id-2"))
-    try await manager.commit(identity)
+    let identity = try #require(try manager.identify(externalID: "external-id-2"))
 
     #expect(gatewayMock.deleteCalled)
     #expect(identity.anonymousID != existing.anonymousID)
@@ -51,27 +64,26 @@ struct IdentityManagerTests {
     #expect(gatewayMock.saveIdentityCalledWithIdentity == identity)
   }
 
-  @Test func `failed switch persistence leaves pending logout for retry`() async throws {
+  @Test func `failed switch persistence leaves pending logout for retry`() throws {
     let existing = Identity(externalID: "external-id")
     gatewayMock.findReturnValue = existing
     gatewayMock.saveError = CocoaError(.fileWriteNoPermission)
 
-    await #expect(throws: CocoaError(.fileWriteNoPermission)) {
-      _ = try await manager.prepareIdentity(for: "external-id-2")
+    #expect(throws: CocoaError(.fileWriteNoPermission)) {
+      _ = try manager.identify(externalID: "external-id-2")
     }
     #expect(manager.currentIdentity == nil)
     #expect(gatewayMock.findReturnValue == nil)
 
     gatewayMock.saveError = nil
-    let identity = try #require(await manager.prepareIdentity(for: "external-id-2"))
+    let identity = try #require(try manager.identify(externalID: "external-id-2"))
     #expect(identity.anonymousID != existing.anonymousID)
     #expect(identity.externalID == Identity.hashExternalID(from: "external-id-2"))
   }
 
-  @Test func identificationAfterLogoutKeepsAnonymousIDs() async throws {
-    let anonymousIdentity = try await manager.logout()
-    let identity = try #require(await manager.prepareIdentity(for: "new-account"))
-    try await manager.commit(identity)
+  @Test func `identification after logout keeps anonymous IDs`() throws {
+    let anonymousIdentity = try manager.logout()
+    let identity = try #require(try manager.identify(externalID: "new-account"))
 
     #expect(manager.currentIdentity == identity)
     #expect(identity.externalID == Identity.hashExternalID(from: "new-account"))
@@ -79,42 +91,38 @@ struct IdentityManagerTests {
     #expect(identity.deviceID == anonymousIdentity.deviceID)
   }
 
-  @Test func identifyAfterFailedLogoutCreatesFreshIDs() async throws {
-    let oldIdentity = try #require(await manager.prepareIdentity(for: "old-account"))
-    try await manager.commit(oldIdentity)
+  @Test func `identify after failed logout creates fresh IDs`() throws {
+    let oldIdentity = try #require(try manager.identify(externalID: "old-account"))
     gatewayMock.saveError = CocoaError(.fileWriteNoPermission)
-    await #expect(throws: CocoaError(.fileWriteNoPermission)) {
-      try await manager.logout()
+    #expect(throws: CocoaError(.fileWriteNoPermission)) {
+      try manager.logout()
     }
     #expect(manager.currentIdentity == nil)
     #expect(gatewayMock.findReturnValue == nil)
 
     gatewayMock.saveError = nil
-    let identity = try #require(await manager.prepareIdentity(for: "new-account"))
-    try await manager.commit(identity)
+    let identity = try #require(try manager.identify(externalID: "new-account"))
     #expect(identity.anonymousID != oldIdentity.anonymousID)
     #expect(identity.deviceID != oldIdentity.deviceID)
     #expect(identity.externalID == Identity.hashExternalID(from: "new-account"))
   }
 
-  @Test func failedDeletionBlocksIdentificationUntilLogoutCanComplete() async throws {
-    let oldIdentity = try #require(await manager.prepareIdentity(for: "old-account"))
-    try await manager.commit(oldIdentity)
+  @Test func `failed deletion blocks identification until logout can complete`() throws {
+    let oldIdentity = try #require(try manager.identify(externalID: "old-account"))
     gatewayMock.deleteError = CocoaError(.fileWriteNoPermission)
-    await #expect(throws: CocoaError(.fileWriteNoPermission)) {
-      try await manager.logout()
+    #expect(throws: CocoaError(.fileWriteNoPermission)) {
+      try manager.logout()
     }
     let reads = gatewayMock.findCallCount
-    await #expect(throws: CocoaError(.fileWriteNoPermission)) {
-      _ = try await manager.prepareIdentity(for: "new-account")
+    #expect(throws: CocoaError(.fileWriteNoPermission)) {
+      _ = try manager.identify(externalID: "new-account")
     }
     #expect(manager.currentIdentity == nil)
     #expect(gatewayMock.findReturnValue == oldIdentity)
     #expect(gatewayMock.findCallCount == reads)
 
     gatewayMock.deleteError = nil
-    let identity = try #require(await manager.prepareIdentity(for: "new-account"))
-    try await manager.commit(identity)
+    let identity = try #require(try manager.identify(externalID: "new-account"))
     #expect(identity.anonymousID != oldIdentity.anonymousID)
     #expect(identity.deviceID != oldIdentity.deviceID)
   }

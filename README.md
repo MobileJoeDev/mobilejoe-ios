@@ -38,7 +38,7 @@ https://github.com/MobileJoeDev/mobilejoe-ios.git
 
 ## Quick start
 
-Configure once at app startup and await it before showing SDK views:
+Configure once in your app's initializer, before any SDK view appears:
 
 ```swift
 import SwiftUI
@@ -47,29 +47,25 @@ import MobileJoeUI
 
 @main
 struct MyApp: App {
-  @State private var isConfigured = false
+  init() {
+    do {
+      try Joe.configure(withAPIKey: "YOUR_API_KEY")
+    } catch {
+      print("Mobile Joe configuration failed: \(error)")
+    }
+  }
 
   var body: some Scene {
     WindowGroup {
-      if isConfigured {
-        NavigationStack {
-          FAQView(presentationMode: .inNavigationStack, configuration: .standard(recipient: "support@example.com"))
-        }
-      } else {
-        ProgressView()
-          .task {
-            do {
-              try await Joe.configure(withAPIKey: "YOUR_API_KEY")
-              isConfigured = true
-            } catch {
-              print("Mobile Joe configuration failed: \(error)")
-            }
-          }
+      NavigationStack {
+        FAQView(presentationMode: .inNavigationStack, configuration: .standard(recipient: "support@example.com"))
       }
     }
   }
 }
 ```
+
+`configure` returns right away, and SDK views load content immediately. It sends the identity to Mobile Joe in the background. If that fails, the SDK logs an error with the subsystem `MobileJoe` to the Xcode console. After a network error, it retries on the next app start. An invalid API key disables SDK requests until the app restarts.
 
 ## Documentation
 

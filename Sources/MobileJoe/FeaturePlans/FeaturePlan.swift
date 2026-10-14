@@ -14,7 +14,7 @@ public class FeaturePlan: Identifiable, Hashable, Codable {
   public private(set) var updatedAt: Date
   public private(set) var isVoted: Bool
 
-  init(id: Int, title: String, body: String, score: Int, status: Status, createdAt: Date, updatedAt: Date, isVoted: Bool) {
+  package init(id: Int, title: String, body: String, score: Int, status: Status, createdAt: Date, updatedAt: Date, isVoted: Bool) {
     self.id = id
     self.title = title
     self.body = body
@@ -25,7 +25,7 @@ public class FeaturePlan: Identifiable, Hashable, Codable {
     self.isVoted = isVoted
   }
 
-  func update(from featurePlan: FeaturePlan) {
+  package func update(from featurePlan: FeaturePlan) {
     guard id == featurePlan.id else { return }
     score = featurePlan.score
     updatedAt = featurePlan.updatedAt

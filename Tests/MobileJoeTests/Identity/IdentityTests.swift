@@ -22,16 +22,26 @@ struct IdentityTests {
     #expect(output == expectedID)
   }
 
-  @Test func `preserve identity snapshot after logout`() async throws {
+  @Test func `preserve identity snapshot after logout`() throws {
     let manager = IdentityManager(gateway: IdentityGatewayMock())
-    let identified = try #require(await manager.prepareIdentity(for: "account-id"))
-    try await manager.commit(identified)
+    let identified = try #require(try manager.identify(externalID: "account-id"))
     let snapshot = identified
-    let anonymous = try await manager.logout()
+    let anonymous = try manager.logout()
 
     #expect(snapshot.id == identified.externalID)
     #expect(anonymous.id == anonymous.anonymousID)
     #expect(snapshot.id != anonymous.id)
+  }
+
+  @Test func `belongs only to its own app user ID`() {
+    #expect(Identity(externalID: "account-id").belongs(to: "account-id"))
+    #expect(!Identity(externalID: "account-id").belongs(to: "other-account"))
+    #expect(!Identity(externalID: nil).belongs(to: "account-id"))
+  }
+
+  @Test func `is anonymous only without app user ID`() {
+    #expect(Identity(externalID: nil).isAnonymous)
+    #expect(!Identity(externalID: "account-id").isAnonymous)
   }
 
   @Test func `create identity with external ID`() throws {

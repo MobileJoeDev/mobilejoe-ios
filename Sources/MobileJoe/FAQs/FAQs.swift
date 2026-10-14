@@ -6,7 +6,7 @@ import Observation
 
 @Observable
 public class FAQs {
-  public var all = [FAQItem]()
+  public package(set) var all = [FAQItem]()
 
   public var isEmpty: Bool {
     all.isEmpty
@@ -14,8 +14,12 @@ public class FAQs {
 
   private let gateway: FAQGateway
 
-  public init(gateway: FAQGateway? = nil) {
-    self.gateway = gateway ?? RemoteFAQGateway.shared
+  public convenience init() {
+    self.init(gateway: RemoteFAQGateway.shared)
+  }
+
+  package init(gateway: FAQGateway) {
+    self.gateway = gateway
   }
 
   public func load() async throws {

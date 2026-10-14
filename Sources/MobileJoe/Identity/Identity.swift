@@ -20,6 +20,8 @@ public struct Identity: Equatable, Codable, CustomStringConvertible, CustomDebug
   private(set) var externalID: String?
   private(set) var deviceID: String
 
+  var isAnonymous: Bool { externalID == nil }
+
   init(externalID: String?) {
     anonymousID = "$MBJAnonymousID:\(UUID().compactString)"
     deviceID = "$MBJDeviceID:\(UUID().compactString)"
@@ -28,6 +30,10 @@ public struct Identity: Equatable, Codable, CustomStringConvertible, CustomDebug
 
   mutating func update(externalID: String?) {
     self.externalID = Self.hashExternalID(from: externalID)
+  }
+
+  func belongs(to externalID: String) -> Bool {
+    self.externalID == Self.hashExternalID(from: externalID)
   }
 }
 

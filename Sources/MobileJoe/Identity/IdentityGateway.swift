@@ -5,9 +5,9 @@ import Foundation
 import OSLog
 
 protocol IdentityGateway {
-  func find() async throws -> Identity?
-  func save(identity: Identity) async throws
-  func delete() async throws
+  func find() throws -> Identity?
+  func save(identity: Identity) throws
+  func delete() throws
 }
 
 class FileBasedIdentityGateway: IdentityGateway {
@@ -26,16 +26,17 @@ class FileBasedIdentityGateway: IdentityGateway {
     findOrCreateIdentityURL()
   }
 
-  func find() async throws -> Identity? {
+  func find() throws -> Identity? {
     var coordinationError: NSError? = nil
     var identity: Identity?
     var operationError: Error?
     fileCoordinator.coordinate(readingItemAt: identityURL, error: &coordinationError) { url in
       do {
-        let identityData = try Data(contentsOf: url)
-        identity = try JSONDecoder().decode(Identity.self, from: identityData)
+        identity = try readIdentity(at: url)
       } catch CocoaError.fileReadNoSuchFile {
         // First launch has no persisted identity.
+      } catch is DecodingError {
+        logger.error("Joe says: Identity file is corrupt. Replacing it with a new identity.")
       } catch {
         operationError = error
         logger.error("Joe says: Failed to find identity file. Error: \(error.localizedDescription)")
@@ -47,10 +48,11 @@ class FileBasedIdentityGateway: IdentityGateway {
     return identity
   }
 
-  func save(identity: Identity) async throws {
+  func save(identity: Identity) throws {
     var coordinationError: NSError? = nil
     var operationError: Error? = nil
     fileCoordinator.coordinate(writingItemAt: identityURL, options: .forMerging, error: &coordinationError) { url in
+      guard !isStored(identity, at: url) else { return }
       do {
         let identityData = try JSONEncoder().encode(identity)
         try identityData.write(to: url, options: [.atomic, .noFileProtection])
@@ -68,7 +70,7 @@ class FileBasedIdentityGateway: IdentityGateway {
     }
   }
 
-  func delete() async throws {
+  func delete() throws {
     var coordinationError: NSError? = nil
     var operationError: Error? = nil
     fileCoordinator.coordinate(writingItemAt: identityURL, options: .forDeleting, error: &coordinationError) { url in
@@ -88,6 +90,14 @@ class FileBasedIdentityGateway: IdentityGateway {
     if let operationError {
       throw operationError
     }
+  }
+
+  private func isStored(_ identity: Identity, at url: URL) -> Bool {
+    (try? readIdentity(at: url)) == identity
+  }
+
+  private func readIdentity(at url: URL) throws -> Identity {
+    try JSONDecoder().decode(Identity.self, from: Data(contentsOf: url))
   }
 
   private func findOrCreateIdentityURL() {

@@ -12,20 +12,24 @@ struct FAQListView: View {
   @Environment(\.dismiss) private var dismiss
   @State private var error: Error? = nil
   @State private var isLoading = true
-  @State private var selection: FAQItem?
 
   var body: some View {
     List {
-      ForEach(faqs.all) { faqItem in
-        FAQListRow(faqItem: faqItem)
-          .onTapGesture {
-            selection = faqItem
+      Section {
+        ForEach(faqs.all) { faqItem in
+          NavigationLink {
+            FAQDetailView(faqItem: faqItem, configuration: configuration)
+          } label: {
+            FAQListRow(faqItem: faqItem)
           }
+        }
       }
-    }
-    .sheet(item: $selection) { faqItem in
-      NavigationStack {
-        FAQDetailView(faqItem: faqItem, configuration: configuration)
+
+      if !faqs.isEmpty, let mailToURL = configuration.mailToURL {
+        Section {
+          FAQContactSupportView(configuration: configuration, mailToURL: mailToURL)
+            .padding(.vertical, 8)
+        }
       }
     }
     .refreshable {
@@ -65,10 +69,12 @@ extension FAQListView {
   private func Overlay() -> some View {
     if isLoading {
       ProgressView(String(localized: "faq.list.loading", bundle: .module))
-    } else if error != nil {
-      JoeContentUnavailableFailureView()
-    } else if faqs.all.isEmpty {
-      JoeContentUnavailableView(title: "faq-list.no-items.title", text: "faq-list.no-items.text")
+    } else if faqs.isEmpty {
+      if error != nil {
+        JoeContentUnavailableFailureView()
+      } else {
+        JoeContentUnavailableView(title: "faq-list.no-items.title", text: "faq-list.no-items.text")
+      }
     }
   }
 }

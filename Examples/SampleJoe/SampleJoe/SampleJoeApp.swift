@@ -7,12 +7,13 @@ import OSLog
 
 @main
 struct SampleJoeApp: App {
+  init() {
+    try? Joe.configure(withAPIKey: "YOUR_MOBILE_JOE_API_KEY")
+  }
+
   var body: some Scene {
     WindowGroup {
       FeatureListView()
-        .task {
-          try? await Joe.configure(withAPIKey: "YOUR_MOBILE_JOE_API_KEY")
-        }
     }
   }
 }

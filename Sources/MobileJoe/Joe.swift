@@ -9,15 +9,18 @@ public class Joe {
     IdentityManager.shared.currentIdentity
   }
 
-  public static func configure(withAPIKey apiKey: String, appUserID: String? = nil, debugMode: Bool = false) async throws {
-    try await NetworkClient.shared.configure(withAPIKey: apiKey, externalID: appUserID, debugMode: debugMode)
+  public static func configure(withAPIKey apiKey: String, appUserID: String? = nil, debugMode: Bool = false) throws {
+    guard let identity = try NetworkClient.shared.configure(withAPIKey: apiKey, externalID: appUserID, debugMode: debugMode) else { return }
+    Task { await NetworkClient.shared.send(identity) }
   }
 
-  public static func identify(appUserID: String) async throws {
-    try await NetworkClient.shared.identify(externalID: appUserID)
+  public static func identify(appUserID: String) throws {
+    guard let identity = try NetworkClient.shared.identify(externalID: appUserID) else { return }
+    Task { await NetworkClient.shared.send(identity) }
   }
 
-  public static func logout() async throws {
-    try await NetworkClient.shared.logout()
+  public static func logout() throws {
+    let identity = try NetworkClient.shared.logout()
+    Task { await NetworkClient.shared.send(identity) }
   }
 }

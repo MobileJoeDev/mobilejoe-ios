@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE for details.
 
 import Foundation
+import MobileJoe
 
+@MainActor
 extension FAQs {
   public static var preview: FAQs {
     let gateway = InMemoryFAQGateway.seed

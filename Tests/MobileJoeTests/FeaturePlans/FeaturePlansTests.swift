@@ -113,6 +113,12 @@ struct FeaturePlansTests {
     #expect(gateway.voteCallCount == 1)
     #expect(subject.all.count == 3)
   }
+
+  @Test func `unknown feature plan throws public error`() async {
+    await #expect(throws: FeaturePlansError.unknownFeaturePlan) {
+      try await subject.featurePlan(id: 42)
+    }
+  }
 }
 
 extension FeaturePlansTests {

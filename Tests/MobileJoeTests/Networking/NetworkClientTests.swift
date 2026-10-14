@@ -89,13 +89,14 @@ struct NetworkClientTests {
       )
     }
 
-    @Test func repeatedConfigurationPreservesSettingsAndLoggedOutIdentity() async throws {
+    @Test func `repeated configuration preserves settings and logged out identity`() async throws {
       router.nextResult = (Data(), try makeResponse(path: "/v1/identify"))
-      try await client.configure(withAPIKey: "first-key", externalID: "first-account", debugMode: true)
-      try await client.logout()
+      let identity = try #require(try client.configure(withAPIKey: "first-key", externalID: "first-account", debugMode: true))
+      _ = try client.logout()
 
-      try await client.configure(withAPIKey: "second-key", externalID: "second-account", debugMode: false)
-      #expect(router.performCallCount == 1)
+      #expect(try client.configure(withAPIKey: "second-key", externalID: "second-account", debugMode: false) == nil)
+      await client.send(identity)
+      #expect(router.performCallCount == 0)
 
       _ = try await client.getAlerts()
       #expect(router.lastRequest?.value(forHTTPHeaderField: "Authorization") == "Bearer first-key")
@@ -103,24 +104,56 @@ struct NetworkClientTests {
       #expect(router.lastRequest?.value(forHTTPHeaderField: "Identity-External-ID") == nil)
     }
 
-    @Test func failedConfigurationCanBeRetried() async throws {
+    @Test func `configuration returns before identification and requests use target identity`() async throws {
+      router.nextResult = (Data("[]".utf8), try makeResponse(path: "/v1/alerts"))
+      let identity = try #require(try client.configure(withAPIKey: "second-key", externalID: "account-id", debugMode: false))
+      #expect(router.performCallCount == 0)
+
+      _ = try await client.getAlerts()
+      let request = try #require(router.requests.first)
+      #expect(request.url?.path == "/v1/alerts")
+      #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer second-key")
+      #expect(request.value(forHTTPHeaderField: "Debug-Mode") == "false")
+      #expect(request.value(forHTTPHeaderField: "Identity-External-ID") == Identity.hashExternalID(from: "account-id"))
+      await client.send(identity)
+      #expect(router.requests.map(\.url?.path) == ["/v1/alerts", "/v1/identify"])
+    }
+
+    @Test func `failed background identification is not retried by identification`() async throws {
       router.nextError = URLError(.notConnectedToInternet)
-      await #expect(throws: URLError(.notConnectedToInternet)) {
-        try await client.configure(withAPIKey: "api-key", externalID: "account-id")
-      }
+      try await client.configureAndSend(withAPIKey: "api-key", externalID: "account-id")
+      #expect(router.performCallCount == 1)
 
       router.nextResult = (Data(), try makeResponse(path: "/v1/identify"))
-      try await client.configure(withAPIKey: "api-key", externalID: "account-id")
-      try await client.configure(withAPIKey: "api-key", externalID: "account-id")
+      try await client.identifyAndSend(externalID: "account-id")
+      #expect(router.performCallCount == 1)
+    }
+
+    @Test func `invalid API key disables requests`() async throws {
+      router.nextResult = (Data(), try makeResponse(path: "/v1/identify", statusCode: 401))
+      try await client.configureAndSend(withAPIKey: "invalid-key", externalID: "account-id")
+      #expect(router.performCallCount == 1)
+
+      for request in [{ _ = try await client.getAlerts() }, { try await client.identifyAndSend(externalID: "account-id") }] {
+        let error = await #expect(throws: MobileJoeError.self) { try await request() }
+        if case .notConfigured = error {} else { Issue.record("Expected .notConfigured error, got \(String(describing: error))") }
+      }
+      #expect(router.performCallCount == 1)
+    }
+
+    @Test(arguments: [403, 500])
+    func `other identification failures keep requests enabled`(statusCode: Int) async throws {
+      router.nextResult = (Data(), try makeResponse(path: "/v1/identify", statusCode: statusCode))
+      try await client.configureAndSend(withAPIKey: "api-key", externalID: "account-id")
+
+      router.nextResult = (Data("[]".utf8), try makeResponse(path: "/v1/alerts"))
+      _ = try await client.getAlerts()
       #expect(router.performCallCount == 2)
     }
 
-    @Test func concurrentConfigurationSendsOneIdentifyRequest() async throws {
-      router.nextResult = (Data(), try makeResponse(path: "/v1/identify"))
-      async let first: Void = client.configure(withAPIKey: "api-key", externalID: "account-id")
-      async let second: Void = client.configure(withAPIKey: "api-key", externalID: "account-id")
-      _ = try await (first, second)
-      #expect(router.performCallCount == 1)
+    @Test func `repeated configuration has nothing to send`() throws {
+      #expect(try client.configure(withAPIKey: "api-key", externalID: "account-id") != nil)
+      #expect(try client.configure(withAPIKey: "api-key", externalID: "account-id") == nil)
     }
 
     @Test func `sets expected headers on requests`() async throws {
@@ -164,6 +197,42 @@ struct NetworkClientTests {
       #expect(router.performCallCount == 0)
     }
 
+    @Test func `throws not configured before configuration without identity`() async {
+      let router = RouterMock()
+      let client = NetworkClient(router: router, identityManager: IdentityManager(gateway: IdentityGatewayMock()))
+
+      let error = await #expect(throws: MobileJoeError.self) {
+        try await client.getAlerts()
+      }
+      guard case .notConfigured = error else {
+        Issue.record("Expected .notConfigured error, got \(String(describing: error))")
+        return
+      }
+      #expect(router.performCallCount == 0)
+    }
+
+    @Test func `logout before configuration has nothing to send`() async throws {
+      let router = RouterMock()
+      let client = NetworkClient(router: router, identityManager: IdentityManager(gateway: IdentityGatewayMock()))
+
+      let identity = try client.logout()
+      await client.send(identity)
+
+      #expect(router.performCallCount == 0)
+    }
+
+    @Test func `configuration after logout identifies the anonymous identity`() async throws {
+      let router = RouterMock()
+      let client = NetworkClient(router: router, identityManager: IdentityManager(gateway: IdentityGatewayMock()))
+      router.nextResult = (Data(), try makeResponse(path: "/v1/identify"))
+
+      let identity = try client.logout()
+      try await client.configureAndSend(withAPIKey: "api-key", externalID: nil)
+
+      #expect(router.performCallCount == 1)
+      #expect(router.lastRequest?.value(forHTTPHeaderField: "Identity-Anonymous-ID") == identity.anonymousID)
+    }
+
     @Test func `throws error when identity is missing`() async throws {
       let router = RouterMock()
       let client = NetworkClient(router: router, isDebugMode: false, apiKey: "api-key", identityManager: IdentityManager(gateway: IdentityGatewayMock()))
@@ -196,7 +265,7 @@ struct NetworkClientTests {
       )
     }
 
-    @Test(arguments: [400, 401, 403, 404, 429, 500, 503])
+    @Test(arguments: [400, 403, 404, 429, 500, 503])
     func `handles HTTP error status codes`(statusCode: Int) async throws {
       router.nextResult = (Data("{}".utf8), try makeResponse(path: "/v1/feature_plans", statusCode: statusCode))
 
@@ -211,6 +280,19 @@ struct NetworkClientTests {
       #expect(actualStatusCode == statusCode)
       #expect(method == "GET")
       #expect(path == "/v1/feature_plans")
+    }
+
+    @Test func `invalid API key disables later requests`() async throws {
+      router.nextResult = (Data("{}".utf8), try makeResponse(path: "/v1/feature_plans", statusCode: 401))
+
+      let error = await #expect(throws: MobileJoeError.self) {
+        _ = try await client.getFeaturePlans(filterBy: nil, sort: .byNewest, search: nil, page: 1)
+      }
+      if case .invalidAPIKey = error {} else { Issue.record("Expected .invalidAPIKey, got \(String(describing: error))") }
+
+      let laterError = await #expect(throws: MobileJoeError.self) { try await client.getAlerts() }
+      if case .notConfigured = laterError {} else { Issue.record("Expected .notConfigured, got \(String(describing: laterError))") }
+      #expect(router.performCallCount == 1)
     }
 
     @Test func `returns raw data without decoding`() async throws {
@@ -249,8 +331,8 @@ struct NetworkClientTests {
       )
     }
 
-    @Test func requestsAfterLogoutUseNewAnonymousIdentity() async throws {
-      try await client.logout()
+    @Test func `requests after logout use new anonymous identity`() async throws {
+      _ = try client.logout()
 
       #expect(router.performCallCount == 0)
       let identity = try #require(gateway.findReturnValue)
@@ -269,11 +351,11 @@ struct NetworkClientTests {
       #expect(request.value(forHTTPHeaderField: "Debug-Mode") == "true")
     }
 
-    @Test func repeatedLogoutRotatesAnonymousIdentity() async throws {
-      try await client.logout()
+    @Test func `repeated logout rotates anonymous identity`() async throws {
+      _ = try client.logout()
       let firstIdentity = try #require(gateway.findReturnValue)
 
-      try await client.logout()
+      _ = try client.logout()
       let secondIdentity = try #require(gateway.findReturnValue)
 
       #expect(secondIdentity.anonymousID != firstIdentity.anonymousID)
@@ -283,12 +365,12 @@ struct NetworkClientTests {
     }
 
     @Test(arguments: ["account-id", "another-account"])
-    func loginAfterLogoutKeepsNewLocalIDs(accountID: String) async throws {
-      try await client.logout()
+    func `login after logout keeps new local IDs`(accountID: String) async throws {
+      _ = try client.logout()
       let anonymousIdentity = try #require(gateway.findReturnValue)
 
       try prepareResponse()
-      try await client.identify(externalID: accountID)
+      try await client.identifyAndSend(externalID: accountID)
 
       let request = try #require(router.lastRequest)
       #expect(request.httpMethod == "POST")
@@ -298,11 +380,11 @@ struct NetworkClientTests {
       #expect(request.value(forHTTPHeaderField: "Identity-External-ID") == Identity.hashExternalID(from: accountID))
     }
 
-    @Test func failedLogoutReportsErrorAndStopsUsingOldIdentity() async throws {
+    @Test func `failed logout reports error and stops using old identity`() async throws {
       gateway.saveError = CocoaError(.fileWriteNoPermission)
 
-      await #expect(throws: CocoaError(.fileWriteNoPermission)) {
-        try await client.logout()
+      #expect(throws: CocoaError(.fileWriteNoPermission)) {
+        _ = try client.logout()
       }
 
       let error = await #expect(throws: MobileJoeError.self) {
@@ -315,52 +397,51 @@ struct NetworkClientTests {
       #expect(router.performCallCount == 0)
 
       gateway.saveError = nil
-      try await client.logout()
+      _ = try client.logout()
       try prepareResponse()
       _ = try await client.getAlerts()
       #expect(router.lastRequest?.value(forHTTPHeaderField: "Identity-External-ID") == nil)
     }
 
-    @Test func identificationPropagatesStorageErrorsAfterBackendSuccess() async throws {
-      try await client.logout()
+    @Test func `identification propagates storage errors before backend request`() async throws {
+      _ = try client.logout()
       let anonymousIdentity = identityManager.currentIdentity
       try prepareResponse()
       gateway.saveError = CocoaError(.fileWriteNoPermission)
 
-      await #expect(throws: CocoaError(.fileWriteNoPermission)) {
-        try await client.identify(externalID: "new-account")
+      #expect(throws: CocoaError(.fileWriteNoPermission)) {
+        try client.identify(externalID: "new-account")
       }
 
-      #expect(router.performCallCount == 1)
+      #expect(router.performCallCount == 0)
       #expect(identityManager.currentIdentity == anonymousIdentity)
     }
 
-    @Test func identificationPropagatesNetworkErrorsAfterLoggingOutPreviousAccount() async throws {
+    @Test func `identification keeps new identity after network error`() async throws {
       router.nextError = URLError(.notConnectedToInternet)
 
-      await #expect(throws: URLError(.notConnectedToInternet)) {
-        try await client.identify(externalID: "new-account")
-      }
+      try await client.identifyAndSend(externalID: "new-account")
 
       #expect(router.performCallCount == 1)
       let identity = try #require(identityManager.currentIdentity)
-      #expect(identity.externalID == nil)
+      #expect(identity.externalID == Identity.hashExternalID(from: "new-account"))
       #expect(identity.anonymousID != oldIdentity.anonymousID)
+      #expect(router.lastRequest?.value(forHTTPHeaderField: "Identity-Anonymous-ID") == identity.anonymousID)
     }
 
     @Test(arguments: [false, true])
-    func logoutAfterIdentificationUsesAnonymousHeaders(fromConfigure: Bool) async throws {
+    func `logout after identification uses anonymous headers`(fromConfigure: Bool) async throws {
       try prepareResponse()
       if fromConfigure {
-        try await client.configure(withAPIKey: "api-key", externalID: "account-id", debugMode: true)
+        try await client.configureAndSend(withAPIKey: "api-key", externalID: "account-id", debugMode: true)
       } else {
-        try await client.identify(externalID: "account-id")
+        try await client.identifyAndSend(externalID: "account-id")
       }
-      #expect(router.performCallCount == 1)
+      let requestsBeforeLogout = router.performCallCount
 
-      try await client.logout()
+      _ = try client.logout()
       let anonymousIdentity = try #require(gateway.findReturnValue)
-      #expect(router.performCallCount == 1)
+      #expect(router.performCallCount == requestsBeforeLogout)
       _ = try await client.getAlerts()
 
       let request = try #require(router.lastRequest)
@@ -370,19 +451,27 @@ struct NetworkClientTests {
       #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer api-key")
     }
 
-    @Test func configurePropagatesNetworkErrors() async throws {
+    @Test func `configuration keeps target identity when identification fails`() async throws {
       router.nextError = URLError(.notConnectedToInternet)
-      await #expect(throws: URLError(.notConnectedToInternet)) {
-        try await client.configure(withAPIKey: "api-key", externalID: "new-account")
-      }
+      let identity = try #require(try client.configure(withAPIKey: "api-key", externalID: "new-account"))
+      #expect(identityManager.currentIdentity == identity)
+      #expect(identity.anonymousID != oldIdentity.anonymousID)
+      #expect(identity.externalID == Identity.hashExternalID(from: "new-account"))
+      #expect(gateway.findReturnValue == identity)
+
+      await client.send(identity)
       #expect(router.performCallCount == 1)
+      #expect(identityManager.currentIdentity == identity)
+      try prepareResponse()
+      _ = try await client.getAlerts()
+      #expect(router.lastRequest?.value(forHTTPHeaderField: "Identity-Anonymous-ID") == identity.anonymousID)
     }
 
-    @Test func clientsReadCurrentIdentityFromManagerWithoutLoadingStorage() async throws {
+    @Test func `clients read current identity from manager without loading storage`() async throws {
       let secondClient = NetworkClient(router: router, apiKey: "api-key", identityManager: identityManager)
       try prepareResponse()
 
-      let anonymousIdentity = try await identityManager.logout()
+      let anonymousIdentity = try identityManager.logout()
       let readsAfterLogout = gateway.findCallCount
       for networkClient in [client, secondClient] {
         _ = try await networkClient.getAlerts()
@@ -392,8 +481,8 @@ struct NetworkClientTests {
       }
       #expect(gateway.findCallCount == readsAfterLogout)
 
-      let signedInIdentity = try #require(await identityManager.prepareIdentity(for: "new-account"))
-      try await identityManager.commit(signedInIdentity)
+      let signedInIdentity = try #require(try identityManager.identify(externalID: "new-account"))
+
       let readsAfterLogin = gateway.findCallCount
       for networkClient in [client, secondClient] {
         _ = try await networkClient.getAlerts()
@@ -402,8 +491,8 @@ struct NetworkClientTests {
       #expect(gateway.findCallCount == readsAfterLogin)
 
       gateway.saveError = CocoaError(.fileWriteNoPermission)
-      await #expect(throws: CocoaError(.fileWriteNoPermission)) {
-        try await identityManager.logout()
+      #expect(throws: CocoaError(.fileWriteNoPermission)) {
+        try identityManager.logout()
       }
       #expect(identityManager.currentIdentity == nil)
       let requestCount = router.performCallCount

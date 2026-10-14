@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE for details.
 
 import Foundation
+import MobileJoe
 
+@MainActor
 extension Alerts {
   public static var preview: Alerts {
     let gateway = InMemoryAlertGateway.seed

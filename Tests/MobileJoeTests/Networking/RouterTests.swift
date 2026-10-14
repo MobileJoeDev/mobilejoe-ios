@@ -16,8 +16,8 @@ struct RouterTests {
     router = DefaultRouter(session: session)
   }
 
-  @Test(arguments: [401, 404, 429, 500, 503])
-  func httpFailuresIncludeRequestContext(statusCode: Int) async throws {
+  @Test(arguments: [404, 429, 500, 503])
+  func `HTTP failures include request context`(statusCode: Int) async throws {
     defer { session.invalidateAndCancel() }
     let url = try #require(URL(string: "https://example.com/\(statusCode)?search=private-search"))
     var request = URLRequest(url: url)
@@ -39,7 +39,17 @@ struct RouterTests {
     #expect(!diagnostics.contains("private-key"))
   }
 
-  @Test func rejectsNonHTTPResponses() async throws {
+  @Test func `unauthorized response means invalid API key`() async throws {
+    defer { session.invalidateAndCancel() }
+    let url = try #require(URL(string: "https://example.com/401"))
+
+    let error = await #expect(throws: MobileJoeError.self) {
+      try await router.perform(URLRequest(url: url))
+    }
+    if case .invalidAPIKey = error {} else { Issue.record("Expected .invalidAPIKey, got \(String(describing: error))") }
+  }
+
+  @Test func `rejects non-HTTP responses`() async throws {
     defer { session.invalidateAndCancel() }
     let url = try #require(URL(string: "https://example.com/non-http"))
     let error = await #expect(throws: MobileJoeError.self) {
@@ -52,7 +62,7 @@ struct RouterTests {
   }
 
   @Test(arguments: [URLError.Code.notConnectedToInternet, .cancelled])
-  func preservesTransportErrors(code: URLError.Code) async throws {
+  func `preserves transport errors`(code: URLError.Code) async throws {
     defer { session.invalidateAndCancel() }
     let url = try #require(URL(string: "https://example.com/\(code.rawValue)"))
     let error = try #require(await #expect(throws: URLError.self) {

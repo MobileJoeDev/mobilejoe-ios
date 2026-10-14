@@ -32,12 +32,10 @@ public struct FeaturePlansView: View {
   }
 
   public init(configuration: FeaturePlansView.Configuration, presentationMode: PresentationMode, selectedFeaturePlanID: Int? = nil) {
-    self.init(
-      featurePlans: FeaturePlans(),
-      presentationMode: presentationMode,
-      configuration: configuration,
-      selectedFeaturePlanID: selectedFeaturePlanID
-    )
+    self.featurePlans = FeaturePlans()
+    self.presentationMode = presentationMode
+    self.configuration = configuration
+    self.selectedFeaturePlanID = selectedFeaturePlanID
   }
 
   public init(featurePlans: FeaturePlans, presentationMode: PresentationMode, configuration: Configuration, selectedFeaturePlanID: Int? = nil) {

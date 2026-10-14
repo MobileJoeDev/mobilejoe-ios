@@ -7,7 +7,7 @@ import Observation
 
 @Observable
 public class FeaturePlans {
-  public var all = [FeaturePlan]()
+  public package(set) var all = [FeaturePlan]()
 
   public var sorting: FeaturePlan.Sorting = .byNewest {
     didSet {
@@ -51,8 +51,12 @@ public class FeaturePlans {
   private(set) var searchDebounceTask: Task<Void, Never>? = nil
   private let gateway: FeaturePlanGateway
 
-  public init(gateway: FeaturePlanGateway? = nil) {
-    self.gateway = gateway ?? RemoteFeaturePlanGateway.shared
+  public convenience init() {
+    self.init(gateway: RemoteFeaturePlanGateway.shared)
+  }
+
+  package init(gateway: FeaturePlanGateway) {
+    self.gateway = gateway
   }
 
   @MainActor deinit {
